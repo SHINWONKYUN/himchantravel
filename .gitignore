@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Server env (NEVER commit — contains RapidAPI key & secrets)
+server/.env
+server/node_modules
+.env
+.env.local
+.env.*.local
