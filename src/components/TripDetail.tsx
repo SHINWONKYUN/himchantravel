@@ -69,6 +69,9 @@ export function TripDetail({ trip, rank, onClose }: Props) {
             {trip.duration} {trip.tripType} · {trip.departureAirportName} 출발 ·{' '}
             {trip.airline} {trip.seatClass}
           </p>
+          <p className="trip-detail__hotel">
+            {'★'.repeat(trip.hotelGrade)} {trip.hotelGrade}성급 호텔
+          </p>
         </div>
 
         <section className="trip-detail__section">

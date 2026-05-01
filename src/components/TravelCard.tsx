@@ -36,6 +36,7 @@ function airlineLine(trip: Trip): string {
 
 function tripPlaceholder(trip: Trip): PlaceholderVariant {
   if (trip.isBusinessSpecial) return 'business'
+  if (trip.destination === '다낭') return 'phu-quoc'
   const m: Record<string, PlaceholderVariant> = {
     'phu-quoc': 'phu-quoc',
     'nha-trang': 'nha-trang',

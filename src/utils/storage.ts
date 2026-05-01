@@ -1,5 +1,5 @@
 import type { TabId } from '../types/app'
-import type { HomeFilterId } from '../types/trip'
+import type { HomeFilterId, SortMode } from '../types/trip'
 
 /** 브라우저 localStorage 키 (서버·DB 없음) */
 export const STORAGE_KEYS = {
@@ -7,17 +7,21 @@ export const STORAGE_KEYS = {
   visited: 'ai-travel-chance:visited',
   activeTab: 'ai-travel-chance:activeTab',
   homeFilters: 'ai-travel-chance:homeFilters',
+  homeSort: 'ai-travel-chance:homeSort',
 } as const
 
 const VALID_TAB: TabId[] = ['home', 'business', 'favorites', 'myTrips']
 
 const VALID_FILTER: HomeFilterId[] = [
-  'unvisited',
   'noShopping',
   'noOption',
-  'business',
-  'may',
+  'noTip',
+  'fiveStar',
+  'under1m',
+  'nationalCarrier',
 ]
+
+const VALID_SORT: SortMode[] = ['recommended', 'priceAsc', 'priceDesc']
 
 function safeParseStringArray(raw: string | null): string[] {
   if (raw == null || raw === '') return []
@@ -92,6 +96,26 @@ export function saveHomeFilters(filters: Set<HomeFilterId>): void {
   if (typeof window === 'undefined') return
   try {
     localStorage.setItem(STORAGE_KEYS.homeFilters, JSON.stringify([...filters]))
+  } catch {
+    /* ignore */
+  }
+}
+
+export function loadHomeSort(): SortMode {
+  if (typeof window === 'undefined') return 'recommended'
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.homeSort)
+    if (raw && (VALID_SORT as string[]).includes(raw)) return raw as SortMode
+  } catch {
+    /* ignore */
+  }
+  return 'recommended'
+}
+
+export function saveHomeSort(mode: SortMode): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEYS.homeSort, mode)
   } catch {
     /* ignore */
   }

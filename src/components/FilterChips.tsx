@@ -1,11 +1,12 @@
 import type { HomeFilterId } from '../types/trip'
 
 const FILTERS: { id: HomeFilterId; label: string }[] = [
-  { id: 'unvisited', label: '안 가본 곳' },
   { id: 'noShopping', label: '노쇼핑' },
   { id: 'noOption', label: '노옵션' },
-  { id: 'business', label: '비즈니스 특가' },
-  { id: 'may', label: '5월 출발' },
+  { id: 'noTip', label: '노팁' },
+  { id: 'fiveStar', label: '5성급' },
+  { id: 'under1m', label: '100만원 이하' },
+  { id: 'nationalCarrier', label: '국적기' },
 ]
 
 type Props = {

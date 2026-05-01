@@ -147,6 +147,53 @@ body {
   color: var(--accent);
 }
 
+.home-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+}
+
+.home-sort__label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: -0.02em;
+}
+
+.home-sort__select {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.home-sort__select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.home-sort__count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 4px 10px;
+  border-radius: var(--radius-chip);
+  letter-spacing: -0.02em;
+}
+
 .card-list {
   display: flex;
   flex-direction: column;
@@ -866,10 +913,18 @@ body {
 }
 
 .trip-detail__sub {
-  margin: 0;
+  margin: 0 0 6px;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-muted);
+  letter-spacing: -0.02em;
+}
+
+.trip-detail__hotel {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b45309;
   letter-spacing: -0.02em;
 }
 

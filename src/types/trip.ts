@@ -47,6 +47,7 @@ export interface Trip {
   travelFatigue: string
   freeTime: string
   summary: string
+  hotelGrade: number
 }
 
 export interface BusinessDeal {
@@ -65,8 +66,11 @@ export interface BusinessDeal {
 }
 
 export type HomeFilterId =
-  | 'unvisited'
   | 'noShopping'
   | 'noOption'
-  | 'business'
-  | 'may'
+  | 'noTip'
+  | 'fiveStar'
+  | 'under1m'
+  | 'nationalCarrier'
+
+export type SortMode = 'recommended' | 'priceAsc' | 'priceDesc'
