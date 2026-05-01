@@ -34,7 +34,7 @@ function matchesFilters(
 }
 
 export function Home() {
-  const { visitedKeys, favoriteIds, toggleFavorite } = useApp()
+  const { visitedKeys, favoriteIds, toggleFavorite, openTripDetail } = useApp()
   const [filters, setFilters] = useState<Set<HomeFilterId>>(loadHomeFilters)
 
   useEffect(() => {
@@ -81,15 +81,20 @@ export function Home() {
             </p>
           </div>
         ) : (
-          trips.map((trip) => (
-            <TravelCard
-              key={trip.id}
-              trip={trip}
-              unvisited={!visitedKeys.has(trip.destinationKey)}
-              saved={favoriteIds.has(trip.id)}
-              onToggleSave={() => toggleFavorite(trip.id)}
-            />
-          ))
+          trips.map((trip, idx) => {
+            const rank = idx + 1
+            return (
+              <TravelCard
+                key={trip.id}
+                trip={trip}
+                rank={rank}
+                unvisited={!visitedKeys.has(trip.destinationKey)}
+                saved={favoriteIds.has(trip.id)}
+                onToggleSave={() => toggleFavorite(trip.id)}
+                onSelect={() => openTripDetail(trip.id, rank)}
+              />
+            )
+          })
         )}
       </section>
 

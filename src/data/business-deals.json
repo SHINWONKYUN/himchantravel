@@ -1,0 +1,30 @@
+[
+  {
+    "id": "biz-tw-ke",
+    "destination": "대만",
+    "departureArea": "서울/인천",
+    "departureAirport": "ICN",
+    "departureAirportName": "인천공항",
+    "airline": "대한항공",
+    "seatClass": "비즈니스",
+    "pricePerPerson": 1390000,
+    "departDates": ["5/12", "5/19"],
+    "dealDetected": true,
+    "summary": "대한항공 비즈니스석 특가 감지",
+    "coverImage": "/images/trips/taiwan.jpg"
+  },
+  {
+    "id": "biz-hk-oz",
+    "destination": "홍콩",
+    "departureArea": "서울/인천",
+    "departureAirport": "GMP",
+    "departureAirportName": "김포공항",
+    "airline": "아시아나",
+    "seatClass": "비즈니스",
+    "pricePerPerson": 1890000,
+    "departDates": ["5/9", "5/16"],
+    "dealDetected": true,
+    "summary": "아시아나 비즈니스 한정 특가",
+    "coverImage": "/images/trips/hong-kong.jpg"
+  }
+]

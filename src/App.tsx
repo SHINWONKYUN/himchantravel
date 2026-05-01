@@ -1,13 +1,21 @@
 import type { ReactNode } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import { BottomNav } from './components/BottomNav'
+import { TripDetail } from './components/TripDetail'
 import { Home } from './pages/Home'
 import { BusinessDeals } from './pages/BusinessDeals'
 import { Favorites } from './pages/Favorites'
 import { MyTrips } from './pages/MyTrips'
+import { MOCK_TRIPS } from './data/mockTrips'
 
 function Shell() {
-  const { activeTab, setActiveTab } = useApp()
+  const {
+    activeTab,
+    setActiveTab,
+    selectedTripId,
+    selectedRank,
+    closeTripDetail,
+  } = useApp()
 
   let body: ReactNode
   switch (activeTab) {
@@ -27,10 +35,21 @@ function Shell() {
       body = <Home />
   }
 
+  const selectedTrip = selectedTripId
+    ? (MOCK_TRIPS.find((t) => t.id === selectedTripId) ?? null)
+    : null
+
   return (
     <div className="app-shell">
       <main className="app-shell__main">{body}</main>
       <BottomNav active={activeTab} onChange={setActiveTab} />
+      {selectedTrip ? (
+        <TripDetail
+          trip={selectedTrip}
+          rank={selectedRank}
+          onClose={closeTripDetail}
+        />
+      ) : null}
     </div>
   )
 }

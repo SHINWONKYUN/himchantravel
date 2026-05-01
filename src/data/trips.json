@@ -1,0 +1,287 @@
+[
+  {
+    "id": "phu-quoc",
+    "destination": "푸꾸옥",
+    "destinationKey": "푸꾸옥",
+    "departureArea": "서울/인천",
+    "departureAirport": "ICN",
+    "departureAirportName": "인천공항",
+    "tripType": "패키지",
+    "duration": "4박 5일",
+    "pricePerPerson": 699000,
+    "departDates": ["5/14", "5/21"],
+    "noShopping": true,
+    "noOption": false,
+    "noTip": true,
+    "airline": "대한항공 또는 일반편",
+    "seatClass": "일반석",
+    "reason": "가격 좋고 휴양 일정이 편해요",
+    "recommendation": "매우 추천",
+    "priceSignal": "가격 좋음",
+    "coverImage": "/images/trips/phu-quoc.jpg",
+    "agencyName": "하나투어",
+    "productTitle": "푸꾸옥 빈펄 리조트 4박 5일",
+    "itinerary": [
+      "1일차: 인천공항 출발 → 푸꾸옥 도착 → 리조트 체크인",
+      "2일차: 자유시간 (해변/수영장/스파)",
+      "3일차: 빈펄 사파리 + 케이블카 1일 투어",
+      "4일차: 자유시간 또는 호핑 투어 (선택)",
+      "5일차: 리조트 → 푸꾸옥공항 → 인천 도착"
+    ],
+    "included": [
+      "왕복 직항 항공권",
+      "리조트 4박 (조식 4회 포함)",
+      "공항-호텔 픽업/샌딩",
+      "현지 한국어 가이드",
+      "여행자보험 1억"
+    ],
+    "excluded": [
+      "가이드/기사 팁 (1인 USD 30)",
+      "선택관광 (호핑투어, 머드스파)",
+      "개인 경비 (식음료, 쇼핑)",
+      "단독 차량 사용료"
+    ],
+    "productUrl": "https://www.hanatour.com/sample/phu-quoc-vinpearl",
+    "pros": [
+      "5성급 리조트 + 키즈풀 보유",
+      "직항 5시간 30분으로 이동 부담 적음",
+      "자유시간 충분(2일차/4일차 종일)"
+    ],
+    "cons": [
+      "출발 시간이 새벽일 가능성",
+      "선택관광 미참여 시 단조로울 수 있음"
+    ],
+    "childFriendly": "매우 적합 - 키즈풀, 가족 객실, 한식 조식 보유",
+    "travelFatigue": "낮음 - 직항 약 5시간 30분, 시차 -2시간",
+    "freeTime": "2일차/4일차 종일",
+    "summary": "가족 휴양에 가장 무난한 가성비 패키지. 첫 동남아 가족여행에 추천."
+  },
+  {
+    "id": "nha-trang",
+    "destination": "나트랑",
+    "destinationKey": "나트랑",
+    "departureArea": "서울/인천",
+    "departureAirport": "ICN",
+    "departureAirportName": "인천공항",
+    "tripType": "패키지",
+    "duration": "3박 5일",
+    "pricePerPerson": 599000,
+    "departDates": ["5/18", "5/25"],
+    "noShopping": false,
+    "noOption": true,
+    "noTip": true,
+    "airline": "국적기 확인 필요",
+    "seatClass": "일반석",
+    "reason": "일정 여유롭고 가격이 매력적이에요",
+    "recommendation": "추천",
+    "priceSignal": "가격 좋음",
+    "coverImage": "/images/trips/nha-trang.jpg",
+    "agencyName": "모두투어",
+    "productTitle": "나트랑 빈펄 호핑투어 3박 5일",
+    "itinerary": [
+      "1일차: 인천공항 출발 (야간 비행)",
+      "2일차: 나트랑 도착 → 빈펄 워터파크 + 사파리",
+      "3일차: 4섬 호핑투어 (스노클링 포함)",
+      "4일차: 자유시간 또는 머드 스파 (선택)",
+      "5일차: 나트랑 → 인천 도착"
+    ],
+    "included": [
+      "왕복 항공권",
+      "호텔 3박 (조식 3회)",
+      "4섬 호핑투어 1일",
+      "한국어 가이드",
+      "공항 픽업/샌딩"
+    ],
+    "excluded": [
+      "여행자보험 (별도 가입 권장)",
+      "기사/가이드 팁 (1인 USD 25)",
+      "머드 스파 등 선택관광",
+      "개인 경비"
+    ],
+    "productUrl": "https://www.modetour.com/sample/nha-trang-vinpearl",
+    "pros": [
+      "호핑투어 포함 가성비",
+      "노옵션 - 추가 강매 없음",
+      "자유시간 풍부"
+    ],
+    "cons": [
+      "야간 도착 일정 (피곤할 수 있음)",
+      "공항-호텔 이동 약 1시간"
+    ],
+    "childFriendly": "보통 - 호핑투어 시 어린이 멀미 가능, 8세 이상 권장",
+    "travelFatigue": "보통 - 야간 비행 + 5시간 소요",
+    "freeTime": "4일차 종일",
+    "summary": "노옵션 + 호핑투어 + 휴양을 한번에 잡는 동남아 가성비 코스."
+  },
+  {
+    "id": "hong-kong",
+    "destination": "홍콩",
+    "destinationKey": "홍콩",
+    "departureArea": "서울/인천",
+    "departureAirport": "GMP",
+    "departureAirportName": "김포공항",
+    "tripType": "패키지",
+    "duration": "3박 4일",
+    "pricePerPerson": 799000,
+    "departDates": ["5/10", "5/17"],
+    "noShopping": false,
+    "noShoppingNote": "노쇼핑 가능",
+    "noOption": false,
+    "noTip": false,
+    "airline": "아시아나 가능",
+    "seatClass": "일반석",
+    "reason": "짧은 일정으로 다녀오기 좋아요",
+    "recommendation": "추천",
+    "priceSignal": "기다림",
+    "coverImage": "/images/trips/hong-kong.jpg",
+    "agencyName": "노랑풍선",
+    "productTitle": "홍콩 + 마카오 시티투어 3박 4일",
+    "itinerary": [
+      "1일차: 김포 출발 → 홍콩 도착 → 빅토리아 피크 야경",
+      "2일차: 마카오 일일 투어 (성 바울 성당, 베네시안)",
+      "3일차: 디즈니랜드 (선택) 또는 자유시간",
+      "4일차: 호텔 → 홍콩공항 → 김포 도착"
+    ],
+    "included": [
+      "왕복 김포-홍콩 항공권",
+      "호텔 3박 (조식 2회)",
+      "마카오 페리 왕복",
+      "한국어 가이드",
+      "빅토리아 피크 트램"
+    ],
+    "excluded": [
+      "디즈니랜드 입장권 (1인 약 12만원)",
+      "여행자보험",
+      "기사/가이드 팁 (1인 USD 35)",
+      "개인 경비"
+    ],
+    "productUrl": "https://www.ybtour.co.kr/sample/hong-kong-macao",
+    "pros": [
+      "김포 출발로 이동 편리",
+      "마카오 일일투어 포함",
+      "도시 + 테마파크 조합 가능"
+    ],
+    "cons": [
+      "쇼핑 일정 포함 가능 (노쇼핑 옵션 별도 신청)",
+      "디즈니랜드 별도 비용",
+      "팁 별도 (USD 35)"
+    ],
+    "childFriendly": "매우 적합 - 디즈니랜드 일정, 짧은 비행시간",
+    "travelFatigue": "낮음 - 김포 직항 3시간 30분",
+    "freeTime": "3일차 (디즈니랜드 vs 자유시간 선택)",
+    "summary": "짧은 휴가에 도시 + 테마파크를 빠르게 즐기는 가족 코스."
+  },
+  {
+    "id": "taiwan",
+    "destination": "대만",
+    "destinationKey": "대만",
+    "departureArea": "서울/인천",
+    "departureAirport": "ICN",
+    "departureAirportName": "인천공항",
+    "tripType": "패키지",
+    "duration": "3박 4일",
+    "pricePerPerson": 599000,
+    "departDates": ["5/12", "5/19"],
+    "noShopping": true,
+    "noOption": false,
+    "noTip": true,
+    "airline": "대한항공 가능",
+    "seatClass": "일반석",
+    "reason": "부담 적은 도시 여행이에요",
+    "recommendation": "추천",
+    "priceSignal": "가격 좋음",
+    "coverImage": "/images/trips/taiwan.jpg",
+    "agencyName": "하나투어",
+    "productTitle": "대만 타이베이 + 지우펀 3박 4일",
+    "itinerary": [
+      "1일차: 인천 → 타오위안 도착 → 시먼딩 야시장",
+      "2일차: 지우펀 + 스펀 천등 일일 투어",
+      "3일차: 타이베이 시내 (101 빌딩, 융캉제) + 야시장",
+      "4일차: 자유시간 → 인천 도착"
+    ],
+    "included": [
+      "왕복 직항 항공권",
+      "호텔 3박 (조식 3회)",
+      "지우펀 + 스펀 일일투어",
+      "한국어 가이드",
+      "공항 픽업/샌딩"
+    ],
+    "excluded": [
+      "여행자보험",
+      "기사 팁 (1인 NTD 600)",
+      "야시장 식사 (1인 평균 NTD 500)",
+      "개인 경비"
+    ],
+    "productUrl": "https://www.hanatour.com/sample/taiwan-jiufen",
+    "pros": [
+      "노쇼핑 확정",
+      "지우펀 일일투어 포함",
+      "야시장 식문화 체험"
+    ],
+    "cons": [
+      "3박 4일이 다소 짧음",
+      "지우펀까지 이동 거리 김 (편도 1시간 30분)"
+    ],
+    "childFriendly": "적합 - 도시 위주, 식사 거부감 적음, 짧은 비행",
+    "travelFatigue": "낮음 - 직항 2시간 30분",
+    "freeTime": "4일차 오전",
+    "summary": "노쇼핑 + 가성비 도시 패키지의 정석. 첫 해외여행 추천."
+  },
+  {
+    "id": "taiwan-biz",
+    "destination": "대만",
+    "destinationKey": "대만",
+    "departureArea": "서울/인천",
+    "departureAirport": "ICN",
+    "departureAirportName": "인천공항",
+    "tripType": "패키지",
+    "duration": "3박 4일",
+    "pricePerPerson": 1390000,
+    "departDates": ["5/12", "5/19"],
+    "noShopping": false,
+    "noOption": false,
+    "noTip": true,
+    "airline": "대한항공",
+    "seatClass": "비즈니스",
+    "reason": "대한항공 비즈 특가로 포착했어요",
+    "recommendation": "특가 감지",
+    "isBusinessSpecial": true,
+    "priceSignal": "특가 감지",
+    "coverImage": "/images/trips/business.jpg",
+    "agencyName": "롯데관광",
+    "productTitle": "[비즈니스] 대한항공 비즈 대만 3박 4일",
+    "itinerary": [
+      "1일차: 인천 → 타이베이 (대한항공 비즈니스, 라운지 이용)",
+      "2일차: 지우펀 + 스펀 + 예류 전용차량 투어",
+      "3일차: 타이베이 시내 자유 (5성급 호텔 라운지)",
+      "4일차: 인천 도착 (대한항공 비즈니스)"
+    ],
+    "included": [
+      "왕복 비즈니스석 항공권",
+      "5성급 호텔 3박 (조식 3회)",
+      "전용 차량 + 한국어 가이드",
+      "라운지 이용권",
+      "여행자보험 1억"
+    ],
+    "excluded": [
+      "야시장 식사",
+      "개인 마사지/스파",
+      "추가 음료/주류",
+      "개인 경비"
+    ],
+    "productUrl": "https://www.lottetour.com/sample/taiwan-business",
+    "pros": [
+      "비즈니스 라운지 + 우선 탑승",
+      "5성급 호텔 + 전용 차량",
+      "단체 일정 최소화"
+    ],
+    "cons": [
+      "가격 부담 (일반석 대비 약 2.3배)",
+      "단체 일정 일부 포함"
+    ],
+    "childFriendly": "보통 - 비즈니스석 가족 동반 시 비용 매우 큼",
+    "travelFatigue": "매우 낮음 - 비즈니스 직항, 라운지 이용",
+    "freeTime": "3일차 종일",
+    "summary": "단기간 프리미엄 휴식이 필요한 중장년 부부에 추천."
+  }
+]

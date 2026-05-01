@@ -35,6 +35,18 @@ export interface Trip {
   recommendation: RecommendationLevel
   isBusinessSpecial?: boolean
   priceSignal: PriceSignal
+  agencyName: string
+  productTitle: string
+  itinerary: string[]
+  included: string[]
+  excluded: string[]
+  productUrl: string
+  pros: string[]
+  cons: string[]
+  childFriendly: string
+  travelFatigue: string
+  freeTime: string
+  summary: string
 }
 
 export interface BusinessDeal {

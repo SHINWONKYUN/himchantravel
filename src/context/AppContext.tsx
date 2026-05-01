@@ -26,6 +26,10 @@ type AppContextValue = {
   toggleVisited: (destinationKey: string) => void
   favoriteIds: Set<string>
   toggleFavorite: (tripId: string) => void
+  selectedTripId: string | null
+  selectedRank: number | null
+  openTripDetail: (tripId: string, rank: number | null) => void
+  closeTripDetail: () => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -43,6 +47,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTab] = useState<TabId>(readInitialTab)
   const [visitedKeys, setVisitedKeys] = useState<Set<string>>(loadVisitedKeys)
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(loadFavoriteIds)
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
+  const [selectedRank, setSelectedRank] = useState<number | null>(null)
 
   useEffect(() => {
     saveActiveTab(activeTab)
@@ -74,6 +80,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const openTripDetail = useCallback(
+    (tripId: string, rank: number | null) => {
+      setSelectedTripId(tripId)
+      setSelectedRank(rank)
+    },
+    [],
+  )
+
+  const closeTripDetail = useCallback(() => {
+    setSelectedTripId(null)
+    setSelectedRank(null)
+  }, [])
+
   const value = useMemo(
     () => ({
       activeTab,
@@ -82,8 +101,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleVisited,
       favoriteIds,
       toggleFavorite,
+      selectedTripId,
+      selectedRank,
+      openTripDetail,
+      closeTripDetail,
     }),
-    [activeTab, visitedKeys, favoriteIds, toggleVisited, toggleFavorite],
+    [
+      activeTab,
+      visitedKeys,
+      favoriteIds,
+      toggleVisited,
+      toggleFavorite,
+      selectedTripId,
+      selectedRank,
+      openTripDetail,
+      closeTripDetail,
+    ],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

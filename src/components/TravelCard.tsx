@@ -1,3 +1,4 @@
+import type { KeyboardEvent, MouseEvent } from 'react'
 import type { Trip } from '../types/trip'
 import { departureLineLabel } from '../utils/departure'
 import { CoverImage, type PlaceholderVariant } from './CoverImage'
@@ -45,24 +46,69 @@ function tripPlaceholder(trip: Trip): PlaceholderVariant {
   return m[trip.id] ?? 'default'
 }
 
+function rankBadgeClass(rank: number): string {
+  if (rank === 1) return 'rank-badge--gold'
+  if (rank === 2) return 'rank-badge--silver'
+  if (rank === 3) return 'rank-badge--bronze'
+  return 'rank-badge--gray'
+}
+
 type Props = {
   trip: Trip
   unvisited: boolean
   saved: boolean
   onToggleSave: () => void
+  rank?: number
+  onSelect?: () => void
 }
 
-export function TravelCard({ trip, unvisited, saved, onToggleSave }: Props) {
+export function TravelCard({
+  trip,
+  unvisited,
+  saved,
+  onToggleSave,
+  rank,
+  onSelect,
+}: Props) {
   const tags = buildTags(trip, unvisited)
   const depart = trip.departDates.join(', ')
   const departShort = `${departureLineLabel(trip)} · ${depart}`
   const alt = `${trip.destination} 여행 대표 이미지`
 
+  const handleHeartClick = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    onToggleSave()
+  }
+
+  const handleCardClick = () => {
+    if (onSelect) onSelect()
+  }
+
+  const handleCardKey = (e: KeyboardEvent<HTMLElement>) => {
+    if (!onSelect) return
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onSelect()
+    }
+  }
+
+  const interactive = Boolean(onSelect)
+
   return (
     <article
-      className={`travel-card${trip.isBusinessSpecial ? ' travel-card--biz-hint' : ''}`}
+      className={`travel-card${trip.isBusinessSpecial ? ' travel-card--biz-hint' : ''}${interactive ? ' travel-card--interactive' : ''}`}
+      onClick={interactive ? handleCardClick : undefined}
+      onKeyDown={interactive ? handleCardKey : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? `${trip.destination} 상세 보기` : undefined}
     >
       <div className="travel-card__media">
+        {rank ? (
+          <span className={`rank-badge ${rankBadgeClass(rank)}`}>
+            {rank}위
+          </span>
+        ) : null}
         <CoverImage
           src={trip.coverImage}
           alt={alt}
@@ -78,7 +124,7 @@ export function TravelCard({ trip, unvisited, saved, onToggleSave }: Props) {
           <button
             type="button"
             className={`travel-card__heart${saved ? ' travel-card__heart--on' : ''}`}
-            onClick={onToggleSave}
+            onClick={handleHeartClick}
             aria-pressed={saved}
             aria-label={saved ? '관심 해제' : '관심 저장'}
           >
