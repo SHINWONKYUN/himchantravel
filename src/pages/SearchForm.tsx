@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react'
-import { PackageSearchCard } from '../components/PackageSearchCard'
 import type {
   BudgetTier,
   CompanionType,
@@ -7,7 +6,6 @@ import type {
   DurationOption,
   PreferenceFlag,
   TravelPurpose,
-  Trip,
 } from '../types/trip'
 
 const DURATION_OPTIONS: { value: DurationOption; label: string }[] = [
@@ -58,14 +56,6 @@ const DESTINATION_KOREAN: Record<string, string> = {
   CEB: '세부',
 }
 
-const PREFERENCE_KOREAN: Record<PreferenceFlag, string> = {
-  noShopping: '노쇼핑',
-  noOption: '노옵션',
-  noTip: '노팁',
-  fiveStar: '5성급',
-  national: '국적기',
-}
-
 const PURPOSE_OPTIONS: { value: TravelPurpose; label: string }[] = [
   { value: 'rest', label: '휴양' },
   { value: 'sight', label: '관광' },
@@ -88,6 +78,43 @@ const PREFERENCE_OPTIONS: { value: PreferenceFlag; label: string }[] = [
   { value: 'noTip', label: '노팁' },
   { value: 'fiveStar', label: '5성급' },
   { value: 'national', label: '국적기' },
+]
+
+interface AgencyLink {
+  name: string
+  buildUrl: (code: string, korean: string) => string
+}
+
+const AGENCIES: AgencyLink[] = [
+  {
+    name: '여기어때',
+    buildUrl: (code) => `https://www.yeogi.com/package/overseas/${code}`,
+  },
+  {
+    name: '하나투어',
+    buildUrl: (code) =>
+      `https://www.hanatour.com/trp/pkg/CHPC0PKG0100M200?catgProdAttrCd=P01&cityCd=${code}`,
+  },
+  {
+    name: '모두투어',
+    buildUrl: (_code, korean) =>
+      `https://www.modetour.com/package/search?keyword=${encodeURIComponent(korean)}`,
+  },
+  {
+    name: '노랑풍선',
+    buildUrl: (_code, korean) =>
+      `https://pkg.ybtour.co.kr/search/searchPdt.yb?query=${encodeURIComponent(korean)}`,
+  },
+  {
+    name: '트립스토어',
+    buildUrl: (_code, korean) =>
+      `https://www.tripstore.kr/search?q=${encodeURIComponent(korean)}`,
+  },
+  {
+    name: '인터파크투어',
+    buildUrl: (_code, korean) =>
+      `https://travel.interpark.com/tour/search?keyword=${encodeURIComponent(korean)}`,
+  },
 ]
 
 function defaultStartDate(): string {
@@ -244,77 +271,6 @@ function formatPrice(raw: number, fallback: string): string {
   return '-'
 }
 
-function packageToTrip(
-  raw: unknown,
-  destinationKorean: string,
-  destinationCode: string,
-  idx: number,
-): Trip | null {
-  if (!raw || typeof raw !== 'object') return null
-  const p = raw as Record<string, unknown>
-  const departureDates = Array.isArray(p.departureDates)
-    ? (p.departureDates as unknown[]).map((d) => String(d)).filter(Boolean)
-    : []
-  const included = Array.isArray(p.included)
-    ? (p.included as unknown[]).map((d) => String(d)).filter(Boolean)
-    : []
-  const excluded = Array.isArray(p.excluded)
-    ? (p.excluded as unknown[]).map((d) => String(d)).filter(Boolean)
-    : []
-  const pros = Array.isArray(p.pros)
-    ? (p.pros as unknown[]).map((d) => String(d)).filter(Boolean)
-    : []
-  const cons = Array.isArray(p.cons)
-    ? (p.cons as unknown[]).map((d) => String(d)).filter(Boolean)
-    : []
-
-  const productTitle = pickFirstString(p.productTitle, p.title)
-  const agencyName = pickFirstString(p.agencyName, p.agency)
-  const price = pickFirstNumber(p.price, p.priceWon, p.pricePerPerson)
-  if (!productTitle && !agencyName && price <= 0) return null
-
-  const hotelGrade = Math.max(0, Math.min(5, pickFirstNumber(p.hotelGrade, p.hotelStar)))
-  const tags: string[] = []
-  if (p.noShopping === true) tags.push('노쇼핑')
-  if (p.noOption === true) tags.push('노옵션')
-  if (p.noTip === true) tags.push('노팁')
-  if (hotelGrade >= 5) tags.push('5성급')
-
-  return {
-    id: `pkg-search-${destinationCode}-${idx}-${Date.now()}`,
-    destination: destinationKorean,
-    destinationKey: destinationCode.toLowerCase(),
-    agencyName,
-    productTitle,
-    price,
-    duration: pickFirstString(p.duration),
-    tripType: '패키지',
-    departureAirport: pickFirstString(p.departureAirport) || 'ICN',
-    departureDates,
-    airline: pickFirstString(p.airline),
-    seatClass: '일반석',
-    hotelName: pickFirstString(p.hotelName),
-    hotelGrade,
-    noShopping: p.noShopping === true,
-    noOption: p.noOption === true,
-    noTip: p.noTip === true,
-    shoppingCount: 0,
-    tags,
-    recommendation: pickFirstString(p.summary, p.recommendation),
-    priceSignal: '가격 좋음',
-    itinerary: [],
-    included,
-    excluded,
-    productUrl: pickFirstString(p.productUrl, p.url),
-    pros,
-    cons,
-    childFriendly: '',
-    travelFatigue: '',
-    freeTime: '',
-    summary: pickFirstString(p.summary),
-  }
-}
-
 export function SearchForm() {
   const [startDate, setStartDate] = useState<string>(defaultStartDate)
   const [duration, setDuration] = useState<DurationOption>('4박5일')
@@ -332,10 +288,6 @@ export function SearchForm() {
   const [flightError, setFlightError] = useState<string | null>(null)
   const [flightResults, setFlightResults] = useState<FlightOffer[] | null>(null)
 
-  const [packageLoading, setPackageLoading] = useState(false)
-  const [packageError, setPackageError] = useState<string | null>(null)
-  const [packageResults, setPackageResults] = useState<Trip[] | null>(null)
-
   const togglePreference = (p: PreferenceFlag) => {
     setPreferences((prev) => {
       const next = new Set(prev)
@@ -349,9 +301,7 @@ export function SearchForm() {
     e.preventDefault()
 
     const originCode = departure === 'seoul' ? 'ICN' : departure
-    const destinationKorean = DESTINATION_KOREAN[destination] ?? destination
 
-    // 1. 항공권 (기존 로직 그대로)
     setFlightLoading(true)
     setFlightError(null)
     setFlightResults(null)
@@ -393,73 +343,13 @@ export function SearchForm() {
         setFlightError(msg)
       })
       .finally(() => setFlightLoading(false))
-
-    // 2. 패키지 (Claude API web_search)
-    setPackageLoading(true)
-    setPackageError(null)
-    setPackageResults(null)
-
-    const month = startDate.slice(0, 7) // YYYY-MM
-    const prefsKorean = [...preferences]
-      .map((p) => PREFERENCE_KOREAN[p])
-      .filter(Boolean)
-
-    fetch('/api/packages/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        destination: destinationKorean,
-        month,
-        adults: travelers,
-        preferences: prefsKorean,
-      }),
-    })
-      .then(async (r) => {
-        const text = await r.text()
-        let data: unknown
-        try {
-          data = JSON.parse(text)
-        } catch {
-          throw new Error('패키지 응답을 JSON으로 파싱할 수 없습니다.')
-        }
-        if (!r.ok) {
-          const errMsg =
-            (data && typeof data === 'object' && 'message' in data
-              ? String((data as Record<string, unknown>).message)
-              : null) || `HTTP ${r.status}`
-          throw new Error(errMsg)
-        }
-        const itemsRaw =
-          data && typeof data === 'object' && 'items' in data
-            ? (data as Record<string, unknown>).items
-            : null
-        const list = Array.isArray(itemsRaw) ? itemsRaw : []
-        const trips = list
-          .map((p, idx) => packageToTrip(p, destinationKorean, destination, idx))
-          .filter((x): x is Trip => x !== null)
-        setPackageResults(trips)
-      })
-      .catch((err) => {
-        const msg =
-          err && typeof err === 'object' && 'message' in err
-            ? String((err as Record<string, unknown>).message)
-            : '패키지 검색 실패'
-        if (
-          msg.toLowerCase().includes('abort') ||
-          msg.includes('timeout') ||
-          msg.includes('타임아웃')
-        ) {
-          setPackageError('검색 시간이 초과되었습니다. 다시 시도해 주세요.')
-        } else if (msg.includes('anthropic_not_configured')) {
-          setPackageError(
-            'AI 검색 키가 아직 등록되지 않았습니다. 사장님께 알려 주세요.',
-          )
-        } else {
-          setPackageError(`패키지 검색에 실패했습니다. (${msg})`)
-        }
-      })
-      .finally(() => setPackageLoading(false))
   }
+
+  const destinationKorean = DESTINATION_KOREAN[destination] ?? destination
+  const destinationLabel =
+    DESTINATION_OPTIONS.find((o) => o.value === destination)?.label ??
+    destination
+  const hasDestination = Boolean(destination && destinationKorean)
 
   return (
     <div className="page search-page">
@@ -467,7 +357,8 @@ export function SearchForm() {
         <p className="page-header__eyebrow">조건 입력</p>
         <h1 className="page-header__title">여행 조건 검색</h1>
         <p className="page-header__sub">
-          입력 조건으로 실시간 항공편과 AI 패키지 검색을 동시에 진행합니다.
+          실시간 항공편을 가져오고, 패키지는 주요 여행사 검색 페이지에서 비교할
+          수 있도록 직접 링크로 안내합니다.
         </p>
       </header>
 
@@ -628,11 +519,9 @@ export function SearchForm() {
         <button
           type="submit"
           className="search-form__submit"
-          disabled={flightLoading || packageLoading}
+          disabled={flightLoading}
         >
-          {flightLoading || packageLoading
-            ? '검색 중…'
-            : '항공권 + 패키지 검색'}
+          {flightLoading ? '검색 중…' : '실시간 항공권 검색'}
         </button>
       </form>
 
@@ -729,45 +618,41 @@ export function SearchForm() {
         ) : null}
       </section>
 
-      <section className="package-results" aria-live="polite">
-        <h2 className="package-results__title">
-          패키지 상품
-          {packageResults ? ` · ${packageResults.length}건` : ''}
-        </h2>
-
-        {packageLoading ? (
-          <div className="package-results__loading" role="status">
-            <span className="spinner" aria-hidden />
-            <span>AI가 패키지를 검색하고 있습니다…</span>
-            <span className="package-results__loading-hint">
-              (5~20초 소요)
-            </span>
-          </div>
-        ) : null}
-
-        {packageError ? (
-          <div className="flight-results__error" role="alert">
-            <p>패키지 검색에 실패했습니다.</p>
-            <p className="flight-results__error-detail">{packageError}</p>
-          </div>
-        ) : null}
-
-        {!packageLoading && !packageError && packageResults && packageResults.length > 0 ? (
-          <div className="package-list">
-            {packageResults.map((trip) => (
-              <PackageSearchCard key={trip.id} trip={trip} />
-            ))}
-          </div>
-        ) : null}
-
-        {!packageLoading && !packageError && packageResults && packageResults.length === 0 ? (
-          <div className="flight-results__empty">
-            <p>조건에 맞는 패키지를 찾지 못했습니다.</p>
-            <p className="flight-results__error-detail">
-              조건(도착지/출발월/선호조건)을 바꿔 다시 시도해 보세요.
-            </p>
-          </div>
-        ) : null}
+      <section className="agency-section">
+        <h2 className="agency-section__title">패키지 비교</h2>
+        <p className="agency-section__sub">
+          {hasDestination
+            ? `${destinationLabel} 패키지를 주요 여행사에서 비교해 보세요. 새 탭에서 열립니다.`
+            : '도착지를 선택하면 여행사 검색 페이지로 바로 이동할 수 있습니다.'}
+        </p>
+        <div className="agency-links">
+          {AGENCIES.map((a) => {
+            if (!hasDestination) {
+              return (
+                <span
+                  key={a.name}
+                  className="agency-links__btn agency-links__btn--disabled"
+                  aria-disabled="true"
+                >
+                  {a.name}
+                </span>
+              )
+            }
+            const url = a.buildUrl(destination, destinationKorean)
+            return (
+              <a
+                key={a.name}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="agency-links__btn"
+              >
+                <span className="agency-links__name">{a.name}</span>
+                <span className="agency-links__cta">에서 보기 ↗</span>
+              </a>
+            )
+          })}
+        </div>
       </section>
     </div>
   )
