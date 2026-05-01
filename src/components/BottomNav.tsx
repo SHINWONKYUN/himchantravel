@@ -111,7 +111,7 @@ export function BottomNav({ active, onChange }: Props) {
       <div className="bottom-nav__brand">
         <span className="bottom-nav__logo">힘찬트래블</span>
         <span className="bottom-nav__badge bottom-nav__badge--live">
-          항공권 실시간
+          항공권 + 패키지 실시간
         </span>
       </div>
       <div className="bottom-nav__items">

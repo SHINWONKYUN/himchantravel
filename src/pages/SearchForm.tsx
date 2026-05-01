@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import { useApp } from '../context/AppContext'
+import { PackageSearchCard } from '../components/PackageSearchCard'
 import type {
   BudgetTier,
   CompanionType,
   DepartureChoice,
   DurationOption,
   PreferenceFlag,
-  SearchQuery,
   TravelPurpose,
+  Trip,
 } from '../types/trip'
 
 const DURATION_OPTIONS: { value: DurationOption; label: string }[] = [
@@ -37,13 +37,34 @@ const DESTINATION_OPTIONS: { value: string; label: string }[] = [
   { value: 'CXR', label: '나트랑 (CXR)' },
   { value: 'PQC', label: '푸꾸옥 (PQC)' },
   { value: 'HKG', label: '홍콩 (HKG)' },
-  { value: 'TPE', label: '타이베이 (TPE)' },
+  { value: 'TPE', label: '대만 (TPE)' },
   { value: 'BKK', label: '방콕 (BKK)' },
   { value: 'KIX', label: '오사카 (KIX)' },
   { value: 'NRT', label: '도쿄 나리타 (NRT)' },
   { value: 'HKT', label: '푸켓 (HKT)' },
   { value: 'CEB', label: '세부 (CEB)' },
 ]
+
+const DESTINATION_KOREAN: Record<string, string> = {
+  DAD: '다낭',
+  CXR: '나트랑',
+  PQC: '푸꾸옥',
+  HKG: '홍콩',
+  TPE: '대만',
+  BKK: '방콕',
+  KIX: '오사카',
+  NRT: '도쿄',
+  HKT: '푸켓',
+  CEB: '세부',
+}
+
+const PREFERENCE_KOREAN: Record<PreferenceFlag, string> = {
+  noShopping: '노쇼핑',
+  noOption: '노옵션',
+  noTip: '노팁',
+  fiveStar: '5성급',
+  national: '국적기',
+}
 
 const PURPOSE_OPTIONS: { value: TravelPurpose; label: string }[] = [
   { value: 'rest', label: '휴양' },
@@ -223,8 +244,78 @@ function formatPrice(raw: number, fallback: string): string {
   return '-'
 }
 
+function packageToTrip(
+  raw: unknown,
+  destinationKorean: string,
+  destinationCode: string,
+  idx: number,
+): Trip | null {
+  if (!raw || typeof raw !== 'object') return null
+  const p = raw as Record<string, unknown>
+  const departureDates = Array.isArray(p.departureDates)
+    ? (p.departureDates as unknown[]).map((d) => String(d)).filter(Boolean)
+    : []
+  const included = Array.isArray(p.included)
+    ? (p.included as unknown[]).map((d) => String(d)).filter(Boolean)
+    : []
+  const excluded = Array.isArray(p.excluded)
+    ? (p.excluded as unknown[]).map((d) => String(d)).filter(Boolean)
+    : []
+  const pros = Array.isArray(p.pros)
+    ? (p.pros as unknown[]).map((d) => String(d)).filter(Boolean)
+    : []
+  const cons = Array.isArray(p.cons)
+    ? (p.cons as unknown[]).map((d) => String(d)).filter(Boolean)
+    : []
+
+  const productTitle = pickFirstString(p.productTitle, p.title)
+  const agencyName = pickFirstString(p.agencyName, p.agency)
+  const price = pickFirstNumber(p.price, p.priceWon, p.pricePerPerson)
+  if (!productTitle && !agencyName && price <= 0) return null
+
+  const hotelGrade = Math.max(0, Math.min(5, pickFirstNumber(p.hotelGrade, p.hotelStar)))
+  const tags: string[] = []
+  if (p.noShopping === true) tags.push('노쇼핑')
+  if (p.noOption === true) tags.push('노옵션')
+  if (p.noTip === true) tags.push('노팁')
+  if (hotelGrade >= 5) tags.push('5성급')
+
+  return {
+    id: `pkg-search-${destinationCode}-${idx}-${Date.now()}`,
+    destination: destinationKorean,
+    destinationKey: destinationCode.toLowerCase(),
+    agencyName,
+    productTitle,
+    price,
+    duration: pickFirstString(p.duration),
+    tripType: '패키지',
+    departureAirport: pickFirstString(p.departureAirport) || 'ICN',
+    departureDates,
+    airline: pickFirstString(p.airline),
+    seatClass: '일반석',
+    hotelName: pickFirstString(p.hotelName),
+    hotelGrade,
+    noShopping: p.noShopping === true,
+    noOption: p.noOption === true,
+    noTip: p.noTip === true,
+    shoppingCount: 0,
+    tags,
+    recommendation: pickFirstString(p.summary, p.recommendation),
+    priceSignal: '가격 좋음',
+    itinerary: [],
+    included,
+    excluded,
+    productUrl: pickFirstString(p.productUrl, p.url),
+    pros,
+    cons,
+    childFriendly: '',
+    travelFatigue: '',
+    freeTime: '',
+    summary: pickFirstString(p.summary),
+  }
+}
+
 export function SearchForm() {
-  const { applySearchQuery } = useApp()
   const [startDate, setStartDate] = useState<string>(defaultStartDate)
   const [duration, setDuration] = useState<DurationOption>('4박5일')
   const [travelers, setTravelers] = useState<number>(2)
@@ -237,10 +328,13 @@ export function SearchForm() {
     () => new Set(),
   )
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState<FlightOffer[] | null>(null)
-  const [rawNotice, setRawNotice] = useState<string | null>(null)
+  const [flightLoading, setFlightLoading] = useState(false)
+  const [flightError, setFlightError] = useState<string | null>(null)
+  const [flightResults, setFlightResults] = useState<FlightOffer[] | null>(null)
+
+  const [packageLoading, setPackageLoading] = useState(false)
+  const [packageError, setPackageError] = useState<string | null>(null)
+  const [packageResults, setPackageResults] = useState<Trip[] | null>(null)
 
   const togglePreference = (p: PreferenceFlag) => {
     setPreferences((prev) => {
@@ -251,75 +345,120 @@ export function SearchForm() {
     })
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
 
-    const query: SearchQuery = {
-      startDate,
-      duration,
-      travelers,
-      companion,
-      departure,
-      purpose,
-      budget,
-      preferences: [...preferences],
-    }
-    applySearchQuery(query)
-
-    setLoading(true)
-    setError(null)
-    setResults(null)
-    setRawNotice(null)
-
     const originCode = departure === 'seoul' ? 'ICN' : departure
-    const params = new URLSearchParams({
+    const destinationKorean = DESTINATION_KOREAN[destination] ?? destination
+
+    // 1. 항공권 (기존 로직 그대로)
+    setFlightLoading(true)
+    setFlightError(null)
+    setFlightResults(null)
+
+    const flightParams = new URLSearchParams({
       origin: originCode,
       dest: destination,
       date: startDate,
       adults: String(travelers),
     })
 
-    try {
-      const r = await fetch(`/api/flights?${params.toString()}`)
-      const text = await r.text()
-      let data: unknown = null
-      try {
-        data = JSON.parse(text)
-      } catch {
-        throw new Error('응답을 JSON으로 파싱할 수 없습니다.')
-      }
-      if (!r.ok) {
-        const errMsg =
-          (data && typeof data === 'object' && 'message' in data
-            ? String((data as Record<string, unknown>).message)
-            : null) || `HTTP ${r.status}`
-        throw new Error(errMsg)
-      }
+    fetch(`/api/flights?${flightParams.toString()}`)
+      .then(async (r) => {
+        const text = await r.text()
+        let data: unknown
+        try {
+          data = JSON.parse(text)
+        } catch {
+          throw new Error('항공편 응답을 JSON으로 파싱할 수 없습니다.')
+        }
+        if (!r.ok) {
+          const errMsg =
+            (data && typeof data === 'object' && 'message' in data
+              ? String((data as Record<string, unknown>).message)
+              : null) || `HTTP ${r.status}`
+          throw new Error(errMsg)
+        }
+        const list = extractItineraries(data)
+        const offers = list
+          .map(mapToFlightOffer)
+          .filter((x): x is FlightOffer => x !== null)
+        setFlightResults(offers)
+      })
+      .catch((err) => {
+        const msg =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as Record<string, unknown>).message)
+            : '항공권 검색 실패'
+        setFlightError(msg)
+      })
+      .finally(() => setFlightLoading(false))
 
-      const list = extractItineraries(data)
-      const offers = list
-        .map(mapToFlightOffer)
-        .filter((x): x is FlightOffer => x !== null)
-      setResults(offers)
+    // 2. 패키지 (Claude API web_search)
+    setPackageLoading(true)
+    setPackageError(null)
+    setPackageResults(null)
 
-      if (offers.length === 0 && list.length > 0) {
-        setRawNotice(
-          `응답 형태를 매핑하지 못했습니다. 첫 항목 키: ${Object.keys(
-            list[0] as Record<string, unknown>,
-          ).join(', ')}`,
-        )
-      } else if (offers.length === 0) {
-        setRawNotice('응답에 항공편 목록이 없습니다.')
-      }
-    } catch (err) {
-      const message =
-        err && typeof err === 'object' && 'message' in err
-          ? String((err as Record<string, unknown>).message)
-          : '검색 실패. 다시 시도해 주세요.'
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
+    const month = startDate.slice(0, 7) // YYYY-MM
+    const prefsKorean = [...preferences]
+      .map((p) => PREFERENCE_KOREAN[p])
+      .filter(Boolean)
+
+    fetch('/api/packages/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        destination: destinationKorean,
+        month,
+        adults: travelers,
+        preferences: prefsKorean,
+      }),
+    })
+      .then(async (r) => {
+        const text = await r.text()
+        let data: unknown
+        try {
+          data = JSON.parse(text)
+        } catch {
+          throw new Error('패키지 응답을 JSON으로 파싱할 수 없습니다.')
+        }
+        if (!r.ok) {
+          const errMsg =
+            (data && typeof data === 'object' && 'message' in data
+              ? String((data as Record<string, unknown>).message)
+              : null) || `HTTP ${r.status}`
+          throw new Error(errMsg)
+        }
+        const itemsRaw =
+          data && typeof data === 'object' && 'items' in data
+            ? (data as Record<string, unknown>).items
+            : null
+        const list = Array.isArray(itemsRaw) ? itemsRaw : []
+        const trips = list
+          .map((p, idx) => packageToTrip(p, destinationKorean, destination, idx))
+          .filter((x): x is Trip => x !== null)
+        setPackageResults(trips)
+      })
+      .catch((err) => {
+        const msg =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as Record<string, unknown>).message)
+            : '패키지 검색 실패'
+        if (
+          msg.toLowerCase().includes('abort') ||
+          msg.includes('timeout') ||
+          msg.includes('타임아웃')
+        ) {
+          setPackageError('검색 시간이 초과되었습니다. 다시 시도해 주세요.')
+        } else if (msg.includes('anthropic_not_configured')) {
+          setPackageError(
+            'AI 검색 키가 아직 등록되지 않았습니다. 사장님께 알려 주세요.',
+          )
+        } else {
+          setPackageError(`패키지 검색에 실패했습니다. (${msg})`)
+        }
+      })
+      .finally(() => setPackageLoading(false))
   }
 
   return (
@@ -328,8 +467,7 @@ export function SearchForm() {
         <p className="page-header__eyebrow">조건 입력</p>
         <h1 className="page-header__title">여행 조건 검색</h1>
         <p className="page-header__sub">
-          입력 조건으로 실시간 항공편을 조회하고, 동시에 등록된 패키지 상품을
-          홈에서 필터합니다.
+          입력 조건으로 실시간 항공편과 AI 패키지 검색을 동시에 진행합니다.
         </p>
       </header>
 
@@ -490,35 +628,37 @@ export function SearchForm() {
         <button
           type="submit"
           className="search-form__submit"
-          disabled={loading}
+          disabled={flightLoading || packageLoading}
         >
-          {loading ? '검색 중…' : '실시간 항공권 검색'}
+          {flightLoading || packageLoading
+            ? '검색 중…'
+            : '항공권 + 패키지 검색'}
         </button>
       </form>
 
       <section className="flight-results" aria-live="polite">
         <h2 className="flight-results__title">
           실시간 항공편
-          {results ? ` · ${results.length}건` : ''}
+          {flightResults ? ` · ${flightResults.length}건` : ''}
         </h2>
 
-        {loading ? (
+        {flightLoading ? (
           <div className="flight-results__loading" role="status">
             <span className="spinner" aria-hidden />
             <span>항공편을 가져오는 중…</span>
           </div>
         ) : null}
 
-        {error ? (
+        {flightError ? (
           <div className="flight-results__error" role="alert">
             <p>검색 실패. 다시 시도해 주세요.</p>
-            <p className="flight-results__error-detail">{error}</p>
+            <p className="flight-results__error-detail">{flightError}</p>
           </div>
         ) : null}
 
-        {!loading && !error && results && results.length > 0 ? (
+        {!flightLoading && !flightError && flightResults && flightResults.length > 0 ? (
           <div className="flight-list">
-            {results.slice(0, 20).map((f) => (
+            {flightResults.slice(0, 20).map((f) => (
               <article key={f.id} className="flight-card">
                 <div className="flight-card__route">
                   <span className="flight-card__code">{f.origin || '?'}</span>
@@ -582,12 +722,50 @@ export function SearchForm() {
           </div>
         ) : null}
 
-        {!loading && !error && results && results.length === 0 ? (
+        {!flightLoading && !flightError && flightResults && flightResults.length === 0 ? (
           <div className="flight-results__empty">
             <p>조건에 맞는 항공편이 없습니다.</p>
-            {rawNotice ? (
-              <p className="flight-results__error-detail">{rawNotice}</p>
-            ) : null}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="package-results" aria-live="polite">
+        <h2 className="package-results__title">
+          패키지 상품
+          {packageResults ? ` · ${packageResults.length}건` : ''}
+        </h2>
+
+        {packageLoading ? (
+          <div className="package-results__loading" role="status">
+            <span className="spinner" aria-hidden />
+            <span>AI가 패키지를 검색하고 있습니다…</span>
+            <span className="package-results__loading-hint">
+              (5~20초 소요)
+            </span>
+          </div>
+        ) : null}
+
+        {packageError ? (
+          <div className="flight-results__error" role="alert">
+            <p>패키지 검색에 실패했습니다.</p>
+            <p className="flight-results__error-detail">{packageError}</p>
+          </div>
+        ) : null}
+
+        {!packageLoading && !packageError && packageResults && packageResults.length > 0 ? (
+          <div className="package-list">
+            {packageResults.map((trip) => (
+              <PackageSearchCard key={trip.id} trip={trip} />
+            ))}
+          </div>
+        ) : null}
+
+        {!packageLoading && !packageError && packageResults && packageResults.length === 0 ? (
+          <div className="flight-results__empty">
+            <p>조건에 맞는 패키지를 찾지 못했습니다.</p>
+            <p className="flight-results__error-detail">
+              조건(도착지/출발월/선호조건)을 바꿔 다시 시도해 보세요.
+            </p>
           </div>
         ) : null}
       </section>
