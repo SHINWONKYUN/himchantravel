@@ -108,22 +108,28 @@ type Props = {
 export function BottomNav({ active, onChange }: Props) {
   return (
     <nav className="bottom-nav" aria-label="주 메뉴">
-      {ITEMS.map((item) => {
-        const on = active === item.id
-        return (
-          <button
-            key={item.id}
-            type="button"
-            className={`bottom-nav__btn${on ? ' bottom-nav__btn--active' : ''}`}
-            onClick={() => onChange(item.id)}
-          >
-            <span className="bottom-nav__icon" aria-hidden>
-              {item.icon}
-            </span>
-            <span className="bottom-nav__label">{item.label}</span>
-          </button>
-        )
-      })}
+      <div className="bottom-nav__brand">
+        <span className="bottom-nav__logo">힘찬트래블</span>
+        <span className="bottom-nav__badge">실시간 검색 연결 예정</span>
+      </div>
+      <div className="bottom-nav__items">
+        {ITEMS.map((item) => {
+          const on = active === item.id
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`bottom-nav__btn${on ? ' bottom-nav__btn--active' : ''}`}
+              onClick={() => onChange(item.id)}
+            >
+              <span className="bottom-nav__icon" aria-hidden>
+                {item.icon}
+              </span>
+              <span className="bottom-nav__label">{item.label}</span>
+            </button>
+          )
+        })}
+      </div>
     </nav>
   )
 }

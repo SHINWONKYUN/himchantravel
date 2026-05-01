@@ -630,9 +630,8 @@ body {
   width: calc(100% - 24px);
   max-width: calc(var(--max-app) - 24px);
   min-height: var(--nav-h);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
+  display: flex;
+  align-items: stretch;
   padding: 6px 4px;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
@@ -640,6 +639,17 @@ body {
   border: 1px solid var(--border);
   box-shadow: 0 2px 12px rgba(17, 24, 39, 0.06);
   z-index: 10;
+}
+
+.bottom-nav__brand {
+  display: none;
+}
+
+.bottom-nav__items {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
 }
 
 @media (min-width: 480px) {
@@ -1267,23 +1277,23 @@ body {
 @media (min-width: 1024px) {
   :root {
     --max-app: 1280px;
-    --nav-h: 56px;
+    --nav-h: 60px;
   }
 
   .app-frame {
-    padding: 32px 24px;
+    padding: calc(var(--nav-h) + 32px) 24px 32px;
     align-items: flex-start;
   }
 
   .app-shell {
     max-width: 1280px;
     max-height: none;
-    min-height: calc(100dvh - 64px);
+    min-height: calc(100dvh - var(--nav-h) - 64px);
     border-radius: 24px;
   }
 
   .app-shell__main {
-    padding: 36px 36px calc(var(--nav-h) + 36px);
+    padding: 36px;
   }
 
   .page-header {
@@ -1404,9 +1414,80 @@ body {
     padding: 32px 28px 40px;
   }
 
-  /* BottomNav narrower in PC */
+  /* BottomNav: 상단 고정 헤더 모드 (PC) */
   .bottom-nav {
-    max-width: 540px;
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    height: var(--nav-h);
+    min-height: var(--nav-h);
+    padding: 0 24px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: none;
+    box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+    z-index: 100;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .bottom-nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav__logo {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .bottom-nav__badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--page-bg);
+    padding: 4px 10px;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--border);
+    letter-spacing: -0.02em;
+  }
+
+  .bottom-nav__items {
+    flex: 0 0 auto;
+    display: flex;
+    grid-template-columns: none;
+    gap: 4px;
+  }
+
+  .bottom-nav__btn {
+    flex-direction: row;
+    padding: 8px 16px;
+    gap: 8px;
+    border-radius: var(--radius-chip);
+    min-width: auto;
+  }
+
+  .bottom-nav__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .bottom-nav__label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   /* MyTrips destinations more columns */
@@ -1417,6 +1498,6 @@ body {
 
 @media (min-width: 1280px) {
   .app-frame {
-    padding: 40px 32px;
+    padding: calc(var(--nav-h) + 40px) 32px 40px;
   }
 }

@@ -211,10 +211,6 @@ export function Home() {
           })
         )}
       </section>
-
-      <div className="future-slot" aria-hidden="true">
-        <p className="future-slot__text">실시간 항공권 검색 · 준비 중</p>
-      </div>
     </div>
   )
 }
