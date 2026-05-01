@@ -1248,3 +1248,175 @@ body {
 .trip-detail__cta:hover {
   background: #0d6e66;
 }
+
+/* —— PC layout (>=768px tablet, >=1024px desktop) —— */
+
+@media (min-width: 768px) {
+  .card-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .card-list--biz {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --max-app: 1280px;
+    --nav-h: 56px;
+  }
+
+  .app-frame {
+    padding: 32px 24px;
+    align-items: flex-start;
+  }
+
+  .app-shell {
+    max-width: 1280px;
+    max-height: none;
+    min-height: calc(100dvh - 64px);
+    border-radius: 24px;
+  }
+
+  .app-shell__main {
+    padding: 36px 36px calc(var(--nav-h) + 36px);
+  }
+
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-header__title {
+    font-size: 1.85rem;
+  }
+
+  /* Filter + sort on one row */
+  .home-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .home-controls .filter-chips {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .home-controls .home-sort {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    width: auto;
+  }
+
+  /* Card grid: 3 columns */
+  .card-list,
+  .card-list--biz {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  /* Card height/content compaction */
+  .travel-card__media {
+    height: 160px;
+  }
+
+  .travel-card__body {
+    padding: 14px 16px 16px;
+  }
+
+  .travel-card__title {
+    font-size: 0.98rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .travel-card__price {
+    font-size: 1.4rem;
+    margin: 8px 0 6px;
+  }
+
+  .travel-card__meta-line {
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .travel-card__hotel {
+    margin: 4px 0 10px;
+    font-size: 0.74rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .travel-card__signal-wrap {
+    margin-bottom: 8px;
+  }
+
+  .travel-card__tags {
+    margin-bottom: 10px;
+  }
+
+  .travel-card__reason {
+    font-size: 0.78rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Search form: 2 columns */
+  .search-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 14px;
+  }
+
+  .search-form__fieldset {
+    grid-column: 1 / -1;
+  }
+
+  .search-form__checks {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .search-form__submit {
+    grid-column: 1 / -1;
+    max-width: 360px;
+    justify-self: center;
+    width: 100%;
+  }
+
+  /* Trip detail wider */
+  .trip-detail {
+    max-width: 640px;
+    padding: 32px 28px 40px;
+  }
+
+  /* BottomNav narrower in PC */
+  .bottom-nav {
+    max-width: 540px;
+  }
+
+  /* MyTrips destinations more columns */
+  .destination-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-frame {
+    padding: 40px 32px;
+  }
+}

@@ -164,25 +164,27 @@ export function Home() {
         </div>
       ) : null}
 
-      <FilterChips active={filters} onToggle={toggleFilter} />
+      <div className="home-controls">
+        <FilterChips active={filters} onToggle={toggleFilter} />
 
-      <div className="home-sort" role="group" aria-label="정렬 방식">
-        <label className="home-sort__label" htmlFor="home-sort-select">
-          정렬
-        </label>
-        <select
-          id="home-sort-select"
-          className="home-sort__select"
-          value={sortMode}
-          onChange={(e) => setSortMode(e.target.value as SortMode)}
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <span className="home-sort__count">{trips.length}개</span>
+        <div className="home-sort" role="group" aria-label="정렬 방식">
+          <label className="home-sort__label" htmlFor="home-sort-select">
+            정렬
+          </label>
+          <select
+            id="home-sort-select"
+            className="home-sort__select"
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value as SortMode)}
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <span className="home-sort__count">{trips.length}개</span>
+        </div>
       </div>
 
       <section className="card-list" aria-label="다낭 패키지 목록">
