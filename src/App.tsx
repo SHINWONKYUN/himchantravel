@@ -7,6 +7,7 @@ import { SearchForm } from './pages/SearchForm'
 import { BusinessDeals } from './pages/BusinessDeals'
 import { Favorites } from './pages/Favorites'
 import { MyTrips } from './pages/MyTrips'
+import { AdminPanel } from './pages/AdminPanel'
 import { MOCK_TRIPS } from './data/mockTrips'
 
 function Shell() {
@@ -59,6 +60,13 @@ function Shell() {
 }
 
 function App() {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.pathname.startsWith('/admin')
+  ) {
+    return <AdminPanel />
+  }
+
   return (
     <AppProvider>
       <div className="app-frame">
