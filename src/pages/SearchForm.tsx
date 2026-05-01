@@ -102,15 +102,17 @@ interface FlightOffer {
   arrivalTime: string
   durationMinutes: number
   carrier: string
+  carrierLogo: string
   stops: number
+  bookingUrl: string
 }
 
 function extractItineraries(payload: unknown): unknown[] {
   if (!payload || typeof payload !== 'object') return []
   const p = payload as Record<string, unknown>
   const tryPaths: unknown[] = [
-    (p.data as Record<string, unknown> | undefined)?.itineraries,
     p.itineraries,
+    (p.data as Record<string, unknown> | undefined)?.itineraries,
     (p.data as Record<string, unknown> | undefined)?.flights,
     p.flights,
     p.results,
@@ -122,6 +124,15 @@ function extractItineraries(payload: unknown): unknown[] {
   return []
 }
 
+function readCode(field: unknown): string {
+  if (typeof field === 'string') return field
+  if (field && typeof field === 'object') {
+    const o = field as Record<string, unknown>
+    return pickFirstString(o.displayCode, o.id, o.skyId, o.code, o.iataCode)
+  }
+  return ''
+}
+
 function mapToFlightOffer(item: unknown): FlightOffer | null {
   if (!item || typeof item !== 'object') return null
   const it = item as Record<string, unknown>
@@ -130,50 +141,66 @@ function mapToFlightOffer(item: unknown): FlightOffer | null {
   const lastLeg =
     (legs[legs.length - 1] as Record<string, unknown>) ?? firstLeg
   const price = (it.price as Record<string, unknown>) ?? {}
-  const origin = (firstLeg.origin as Record<string, unknown>) ?? {}
-  const destination = (lastLeg.destination as Record<string, unknown>) ?? {}
-  const carriers = (firstLeg.carriers as Record<string, unknown>) ?? {}
-  const marketing = (carriers.marketing as unknown[]) ?? []
-  const firstCarrier = (marketing[0] as Record<string, unknown>) ?? {}
-  const segments = (firstLeg.segments as unknown[]) ?? []
+
+  let firstCarrier: Record<string, unknown> = {}
+  const carriersField = firstLeg.carriers
+  if (Array.isArray(carriersField)) {
+    firstCarrier = (carriersField[0] as Record<string, unknown>) ?? {}
+  } else if (carriersField && typeof carriersField === 'object') {
+    const marketing = (carriersField as Record<string, unknown>).marketing
+    if (Array.isArray(marketing)) {
+      firstCarrier = (marketing[0] as Record<string, unknown>) ?? {}
+    }
+  }
 
   const id = pickFirstString(it.id, firstLeg.id, String(Math.random()))
-  const priceRaw = pickFirstNumber(price.raw, it.priceRaw, it.price)
+  const priceRaw = pickFirstNumber(price.amount, price.raw, it.priceRaw)
   const priceText = pickFirstString(price.formatted, it.priceText)
-  const originCode = pickFirstString(
-    origin.displayCode,
-    origin.id,
-    origin.skyId,
-    origin.code,
-  )
-  const destCode = pickFirstString(
-    destination.displayCode,
-    destination.id,
-    destination.skyId,
-    destination.code,
-  )
+  const origin = readCode(firstLeg.origin)
+  const destination = readCode(lastLeg.destination)
   const departureTime = pickFirstString(firstLeg.departure, firstLeg.departTime)
   const arrivalTime = pickFirstString(lastLeg.arrival, lastLeg.arrivalTime)
   const durationMinutes = pickFirstNumber(
+    firstLeg.durationMinutes,
     firstLeg.durationInMinutes,
     firstLeg.duration,
   )
-  const carrier = pickFirstString(firstCarrier.name, firstCarrier.alternateId)
-  const stops = Math.max(0, segments.length - 1)
+  const carrier = pickFirstString(
+    firstCarrier.name,
+    firstCarrier.alternateId,
+    firstCarrier.code,
+  )
+  const carrierLogo = pickFirstString(
+    firstCarrier.logoUrl,
+    firstCarrier.logo,
+  )
 
-  if (!originCode && !destCode && priceRaw === 0) return null
+  let stops = 0
+  const stopsField = firstLeg.stopCount
+  if (typeof stopsField === 'number') {
+    stops = stopsField
+  } else {
+    const segments = (firstLeg.segments as unknown[]) ?? []
+    stops = Math.max(0, segments.length - 1)
+  }
+
+  const bookingUrl = pickFirstString(it.bookingUrl, it.deeplink, it.url)
+
+  if (!origin && !destination && priceRaw === 0) return null
 
   return {
     id,
     priceRaw,
     priceText,
-    origin: originCode,
-    destination: destCode,
+    origin,
+    destination,
     departureTime,
     arrivalTime,
     durationMinutes,
     carrier,
+    carrierLogo,
     stops,
+    bookingUrl,
   }
 }
 
@@ -514,6 +541,14 @@ export function SearchForm() {
                 </div>
                 <div className="flight-card__meta">
                   <span className="flight-card__carrier">
+                    {f.carrierLogo ? (
+                      <img
+                        src={f.carrierLogo}
+                        alt=""
+                        className="flight-card__logo"
+                        loading="lazy"
+                      />
+                    ) : null}
                     {f.carrier || '항공사 미상'}
                   </span>
                   {f.stops > 0 ? (
@@ -526,8 +561,21 @@ export function SearchForm() {
                     </span>
                   )}
                 </div>
-                <div className="flight-card__price">
-                  {formatPrice(f.priceRaw, f.priceText)}
+                <div className="flight-card__price-cell">
+                  <span className="flight-card__price">
+                    {formatPrice(f.priceRaw, f.priceText)}
+                  </span>
+                  {f.bookingUrl ? (
+                    <a
+                      href={f.bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flight-card__book"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      예약 ↗
+                    </a>
+                  ) : null}
                 </div>
               </article>
             ))}

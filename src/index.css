@@ -1308,26 +1308,62 @@ body {
   color: var(--accent);
 }
 
-.flight-card__price {
+.flight-card__logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.flight-card__price-cell {
   grid-column: 1 / -1;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.flight-card__price {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.02em;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border);
+}
+
+.flight-card__book {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  padding: 6px 12px;
+  border-radius: var(--radius-chip);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.flight-card__book:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 @media (min-width: 768px) {
   .flight-card {
     grid-template-columns: auto auto 1fr auto;
   }
-  .flight-card__price {
+  .flight-card__price-cell {
     grid-column: auto;
-    text-align: right;
+    flex-direction: column;
+    align-items: flex-end;
     border-top: none;
     padding-top: 0;
+    gap: 4px;
+  }
+  .flight-card__price {
     font-size: 1.05rem;
   }
 }
