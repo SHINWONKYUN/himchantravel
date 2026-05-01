@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { TabId } from '../types/app'
+import type { SearchQuery } from '../types/trip'
 import {
   loadFavoriteIds,
   loadStoredTab,
@@ -30,6 +31,9 @@ type AppContextValue = {
   selectedRank: number | null
   openTripDetail: (tripId: string, rank: number | null) => void
   closeTripDetail: () => void
+  searchQuery: SearchQuery | null
+  applySearchQuery: (q: SearchQuery) => void
+  clearSearchQuery: () => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -37,7 +41,12 @@ const AppContext = createContext<AppContextValue | null>(null)
 function readInitialTab(): TabId {
   if (typeof window === 'undefined') return 'home'
   const raw = new URLSearchParams(window.location.search).get('tab')
-  if (raw === 'business' || raw === 'favorites' || raw === 'myTrips')
+  if (
+    raw === 'search' ||
+    raw === 'business' ||
+    raw === 'favorites' ||
+    raw === 'myTrips'
+  )
     return raw
   const stored = loadStoredTab()
   return stored ?? 'home'
@@ -49,6 +58,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(loadFavoriteIds)
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [selectedRank, setSelectedRank] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null)
 
   useEffect(() => {
     saveActiveTab(activeTab)
@@ -93,6 +103,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSelectedRank(null)
   }, [])
 
+  const applySearchQuery = useCallback((q: SearchQuery) => {
+    setSearchQuery(q)
+    setActiveTab('home')
+  }, [])
+
+  const clearSearchQuery = useCallback(() => {
+    setSearchQuery(null)
+  }, [])
+
   const value = useMemo(
     () => ({
       activeTab,
@@ -105,6 +124,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       selectedRank,
       openTripDetail,
       closeTripDetail,
+      searchQuery,
+      applySearchQuery,
+      clearSearchQuery,
     }),
     [
       activeTab,
@@ -116,6 +138,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       selectedRank,
       openTripDetail,
       closeTripDetail,
+      searchQuery,
+      applySearchQuery,
+      clearSearchQuery,
     ],
   )
 

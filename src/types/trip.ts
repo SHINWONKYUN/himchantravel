@@ -1,42 +1,28 @@
-export type RecommendationLevel =
-  | '매우 추천'
-  | '추천'
-  | '보통'
-  | '보류'
-  | '특가 감지'
-
-export type PriceSignal = '가격 좋음' | '기다림' | '특가 감지'
-
-/** 인천(ICN)·김포(GMP)만 MVP 추천 대상 */
+/** 인천(ICN)·김포(GMP)만 MVP 추천 대상. BusinessDeal 등에 사용. */
 export type DepartureAirportCode = 'ICN' | 'GMP'
 
 export interface Trip {
   id: string
   destination: string
   destinationKey: string
-  /** 화면·설명용 권역, 예: 서울/인천 */
-  departureArea: string
-  departureAirport: DepartureAirportCode
-  departureAirportName: string
-  /** public 기준 경로, 예: /images/trips/phu-quoc.jpg */
-  coverImage?: string
-  tripType: '패키지'
-  duration: string
-  pricePerPerson: number
-  departDates: string[]
-  /** 안 가본 곳 표시는 방문 목록과 결합 */
-  noShopping: boolean
-  noShoppingNote?: string
-  noOption: boolean
-  noTip: boolean
-  airline: string
-  seatClass: '일반석' | '비즈니스'
-  reason: string
-  recommendation: RecommendationLevel
-  isBusinessSpecial?: boolean
-  priceSignal: PriceSignal
   agencyName: string
   productTitle: string
+  price: number
+  duration: string
+  tripType: string
+  departureAirport: string
+  departureDates: string[]
+  airline: string
+  seatClass: string
+  hotelName: string
+  hotelGrade: number
+  noShopping: boolean
+  noOption: boolean
+  noTip: boolean
+  shoppingCount: number
+  tags: string[]
+  recommendation: string
+  priceSignal: string
   itinerary: string[]
   included: string[]
   excluded: string[]
@@ -47,7 +33,6 @@ export interface Trip {
   travelFatigue: string
   freeTime: string
   summary: string
-  hotelGrade: number
 }
 
 export interface BusinessDeal {
@@ -74,3 +59,41 @@ export type HomeFilterId =
   | 'nationalCarrier'
 
 export type SortMode = 'recommended' | 'priceAsc' | 'priceDesc'
+
+export type CompanionType =
+  | 'couple'
+  | 'coupleKids'
+  | 'friends'
+  | 'solo'
+  | 'parents'
+
+export type DurationOption = '3박4일' | '3박5일' | '4박5일' | '4박6일' | '5박6일'
+
+export type DepartureChoice = 'ICN' | 'GMP' | 'seoul'
+
+export type TravelPurpose = 'rest' | 'sight' | 'shop' | 'golf' | 'free'
+
+export type BudgetTier =
+  | 'under500k'
+  | '500to800k'
+  | '800to1200k'
+  | 'over1200k'
+  | 'any'
+
+export type PreferenceFlag =
+  | 'noShopping'
+  | 'noOption'
+  | 'noTip'
+  | 'fiveStar'
+  | 'national'
+
+export interface SearchQuery {
+  startDate: string
+  duration: DurationOption
+  travelers: number
+  companion: CompanionType
+  departure: DepartureChoice
+  purpose: TravelPurpose
+  budget: BudgetTier
+  preferences: PreferenceFlag[]
+}

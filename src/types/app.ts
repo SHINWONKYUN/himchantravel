@@ -1,1 +1,1 @@
-export type TabId = 'home' | 'business' | 'favorites' | 'myTrips'
+export type TabId = 'home' | 'search' | 'business' | 'favorites' | 'myTrips'

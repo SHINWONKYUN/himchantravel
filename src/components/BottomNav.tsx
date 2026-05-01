@@ -21,6 +21,27 @@ const ITEMS: {
     ),
   },
   {
+    id: 'search',
+    label: '검색',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <circle
+          cx="11"
+          cy="11"
+          r="6.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M16 16l4 4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'business',
     label: '특가',
     icon: (

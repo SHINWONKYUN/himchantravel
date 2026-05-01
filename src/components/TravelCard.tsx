@@ -7,44 +7,20 @@ function formatWon(n: number): string {
   return `${n.toLocaleString('ko-KR')}원`
 }
 
-function priceSignalClass(signal: Trip['priceSignal']): string {
-  if (signal === '특가 감지') return 'travel-card__signal--deal'
+function priceSignalClass(signal: string): string {
+  if (signal === '특가 감지' || signal === '프리미엄') return 'travel-card__signal--deal'
   if (signal === '가격 좋음') return 'travel-card__signal--good'
   return 'travel-card__signal--wait'
 }
 
-function buildTags(
-  trip: Trip,
-  unvisited: boolean,
-  max = 3,
-): string[] {
-  const out: string[] = []
-  if (unvisited) out.push('안 가본 곳')
-  if (trip.noShopping) out.push('노쇼핑')
-  else if (trip.noShoppingNote) out.push('노쇼핑 가능')
-  if (trip.noOption) out.push('노옵션')
-  if (trip.isBusinessSpecial && out.length < max) out.push('비즈니스')
-  return out.slice(0, max)
-}
-
-function airlineLine(trip: Trip): string {
-  const a = trip.airline.replace(/\s+/g, ' ').trim()
-  const seat = trip.seatClass
-  if (/일반석|비즈니스/.test(a)) return a
-  return `${a} ${seat}`
-}
-
 function tripPlaceholder(trip: Trip): PlaceholderVariant {
-  if (trip.isBusinessSpecial) return 'business'
+  if (trip.seatClass === '비즈니스') return 'business'
   if (trip.destination === '다낭') return 'phu-quoc'
-  const m: Record<string, PlaceholderVariant> = {
-    'phu-quoc': 'phu-quoc',
-    'nha-trang': 'nha-trang',
-    'hong-kong': 'hong-kong',
-    taiwan: 'taiwan',
-    'taiwan-biz': 'business',
-  }
-  return m[trip.id] ?? 'default'
+  if (trip.destination === '나트랑') return 'nha-trang'
+  if (trip.destination === '홍콩') return 'hong-kong'
+  if (trip.destination === '대만') return 'taiwan'
+  if (trip.destination === '푸꾸옥') return 'phu-quoc'
+  return 'default'
 }
 
 function rankBadgeClass(rank: number): string {
@@ -56,7 +32,6 @@ function rankBadgeClass(rank: number): string {
 
 type Props = {
   trip: Trip
-  unvisited: boolean
   saved: boolean
   onToggleSave: () => void
   rank?: number
@@ -65,16 +40,16 @@ type Props = {
 
 export function TravelCard({
   trip,
-  unvisited,
   saved,
   onToggleSave,
   rank,
   onSelect,
 }: Props) {
-  const tags = buildTags(trip, unvisited)
-  const depart = trip.departDates.join(', ')
+  const tags = trip.tags.slice(0, 3)
+  const depart = trip.departureDates.join(', ')
   const departShort = `${departureLineLabel(trip)} · ${depart}`
   const alt = `${trip.destination} 여행 대표 이미지`
+  const isBusiness = trip.seatClass === '비즈니스'
 
   const handleHeartClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -97,12 +72,12 @@ export function TravelCard({
 
   return (
     <article
-      className={`travel-card${trip.isBusinessSpecial ? ' travel-card--biz-hint' : ''}${interactive ? ' travel-card--interactive' : ''}`}
+      className={`travel-card${isBusiness ? ' travel-card--biz-hint' : ''}${interactive ? ' travel-card--interactive' : ''}`}
       onClick={interactive ? handleCardClick : undefined}
       onKeyDown={interactive ? handleCardKey : undefined}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
-      aria-label={interactive ? `${trip.destination} 상세 보기` : undefined}
+      aria-label={interactive ? `${trip.productTitle} 상세 보기` : undefined}
     >
       <div className="travel-card__media">
         {rank ? (
@@ -111,7 +86,6 @@ export function TravelCard({
           </span>
         ) : null}
         <CoverImage
-          src={trip.coverImage}
           alt={alt}
           placeholderVariant={tripPlaceholder(trip)}
           className="travel-card__cover"
@@ -121,7 +95,10 @@ export function TravelCard({
 
       <div className="travel-card__body">
         <header className="travel-card__head">
-          <h2 className="travel-card__title">{trip.destination}</h2>
+          <div className="travel-card__title-wrap">
+            <p className="travel-card__agency">{trip.agencyName}</p>
+            <h2 className="travel-card__title">{trip.productTitle}</h2>
+          </div>
           <button
             type="button"
             className={`travel-card__heart${saved ? ' travel-card__heart--on' : ''}`}
@@ -133,10 +110,15 @@ export function TravelCard({
           </button>
         </header>
 
-        <p className="travel-card__price">{formatWon(trip.pricePerPerson)}</p>
+        <p className="travel-card__price">{formatWon(trip.price)}</p>
 
         <p className="travel-card__meta-line">
           {trip.duration} {trip.tripType} · {departShort}
+        </p>
+
+        <p className="travel-card__hotel">
+          {'★'.repeat(trip.hotelGrade)} {trip.hotelName} · {trip.airline}{' '}
+          {trip.seatClass}
         </p>
 
         <div className="travel-card__signal-wrap">
@@ -159,10 +141,8 @@ export function TravelCard({
 
         <p className="travel-card__reason">
           <span className="travel-card__reason-lead">추천 이유 · </span>
-          {trip.reason}
+          {trip.recommendation}
         </p>
-
-        <p className="travel-card__airline">{airlineLine(trip)}</p>
       </div>
     </article>
   )

@@ -20,7 +20,7 @@ function EmptyIllustration() {
 }
 
 export function Favorites() {
-  const { visitedKeys, favoriteIds, toggleFavorite, openTripDetail } = useApp()
+  const { favoriteIds, toggleFavorite, openTripDetail } = useApp()
   const saved = MOCK_TRIPS.filter((t) => favoriteIds.has(t.id))
 
   return (
@@ -48,7 +48,6 @@ export function Favorites() {
             <TravelCard
               key={trip.id}
               trip={trip}
-              unvisited={!visitedKeys.has(trip.destinationKey)}
               saved
               onToggleSave={() => toggleFavorite(trip.id)}
               onSelect={() => openTripDetail(trip.id, null)}

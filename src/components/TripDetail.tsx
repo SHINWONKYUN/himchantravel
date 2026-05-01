@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { MouseEvent } from 'react'
 import type { Trip } from '../types/trip'
+import { departureAirportName } from '../utils/departure'
 
 type Props = {
   trip: Trip
@@ -41,7 +42,7 @@ export function TripDetail({ trip, rank, onClose }: Props) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`${trip.destination} 상품 상세`}
+      aria-label={`${trip.productTitle} 상세`}
     >
       <div className="trip-detail" onClick={stop}>
         <button
@@ -62,21 +63,35 @@ export function TripDetail({ trip, rank, onClose }: Props) {
           <p className="trip-detail__agency">{trip.agencyName}</p>
           <h2 className="trip-detail__title">{trip.productTitle}</h2>
           <p className="trip-detail__price">
-            {formatWon(trip.pricePerPerson)}{' '}
+            {formatWon(trip.price)}{' '}
             <span className="trip-detail__price-suffix">/ 1인</span>
           </p>
           <p className="trip-detail__sub">
-            {trip.duration} {trip.tripType} · {trip.departureAirportName} 출발 ·{' '}
-            {trip.airline} {trip.seatClass}
+            {trip.duration} {trip.tripType} · {departureAirportName(trip)} 출발
+            · {trip.airline} {trip.seatClass}
           </p>
           <p className="trip-detail__hotel">
-            {'★'.repeat(trip.hotelGrade)} {trip.hotelGrade}성급 호텔
+            {'★'.repeat(trip.hotelGrade)} {trip.hotelName} ({trip.hotelGrade}성급)
           </p>
+          {trip.tags.length > 0 ? (
+            <div className="trip-detail__tags">
+              {trip.tags.map((t) => (
+                <span key={t} className="trip-detail__tag">
+                  {t}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <section className="trip-detail__section">
           <h3 className="trip-detail__h3">총평</h3>
           <p className="trip-detail__summary">{trip.summary}</p>
+        </section>
+
+        <section className="trip-detail__section">
+          <h3 className="trip-detail__h3">출발 가능 날짜</h3>
+          <p className="trip-detail__dates">{trip.departureDates.join(', ')}</p>
         </section>
 
         <section className="trip-detail__section">
@@ -138,6 +153,10 @@ export function TripDetail({ trip, rank, onClose }: Props) {
             <div>
               <dt>자유시간</dt>
               <dd>{trip.freeTime}</dd>
+            </div>
+            <div>
+              <dt>쇼핑 횟수</dt>
+              <dd>{trip.shoppingCount}회</dd>
             </div>
           </dl>
         </section>

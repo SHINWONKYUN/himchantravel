@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext'
 import { BottomNav } from './components/BottomNav'
 import { TripDetail } from './components/TripDetail'
 import { Home } from './pages/Home'
+import { SearchForm } from './pages/SearchForm'
 import { BusinessDeals } from './pages/BusinessDeals'
 import { Favorites } from './pages/Favorites'
 import { MyTrips } from './pages/MyTrips'
@@ -21,6 +22,9 @@ function Shell() {
   switch (activeTab) {
     case 'home':
       body = <Home />
+      break
+    case 'search':
+      body = <SearchForm />
       break
     case 'business':
       body = <BusinessDeals />

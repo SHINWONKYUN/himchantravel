@@ -1,4 +1,4 @@
-import type { RecommendationLevel, Trip } from '../types/trip'
+import type { Trip } from '../types/trip'
 
 export interface ScoreInput {
   unvisited: boolean
@@ -25,12 +25,12 @@ export function tripToScoreInput(
   const unvisited = !visitedKeys.has(trip.destinationKey)
   return {
     unvisited,
-    noShopping: trip.noShopping || Boolean(trip.noShoppingNote),
+    noShopping: trip.noShopping,
     noOption: trip.noOption,
     noTip: trip.noTip,
     nationalCarrier: hasNationalCarrier(trip.airline),
-    businessDeal: Boolean(trip.isBusinessSpecial || trip.seatClass === '비즈니스'),
-    mayDepart: hasMayDepart(trip.departDates),
+    businessDeal: trip.seatClass === '비즈니스',
+    mayDepart: hasMayDepart(trip.departureDates),
   }
 }
 
@@ -44,18 +44,6 @@ export function computeTripScore(input: ScoreInput): number {
   if (input.businessDeal) s += 5
   if (input.mayDepart) s += 1
   return s
-}
-
-/** 내부 정렬·필터용. 화면 표시용 라벨은 목 데이터 우선. */
-export function scoreToLabel(
-  score: number,
-  businessDeal: boolean,
-): RecommendationLevel {
-  if (businessDeal) return '특가 감지'
-  if (score >= 12) return '매우 추천'
-  if (score >= 9) return '추천'
-  if (score >= 6) return '보통'
-  return '보류'
 }
 
 export function sortTripsByScore(trips: Trip[], visitedKeys: Set<string>): Trip[] {
