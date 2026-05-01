@@ -31,6 +31,32 @@ app.get('/api/health', (req, res) => {
   })
 })
 
+const airportCache = new Map()
+
+async function lookupAirport(skyId, signal) {
+  const key = String(skyId).toUpperCase()
+  if (airportCache.has(key)) return airportCache.get(key)
+
+  const url = new URL(`https://${RAPIDAPI_HOST}/flights/searchAirport`)
+  url.searchParams.set('query', key)
+
+  const r = await fetch(url, {
+    headers: {
+      'X-RapidAPI-Key': RAPIDAPI_KEY,
+      'X-RapidAPI-Host': RAPIDAPI_HOST,
+      Accept: 'application/json',
+    },
+    signal,
+  })
+  if (!r.ok) return null
+  const j = await r.json().catch(() => null)
+  const places = (j && Array.isArray(j.places) ? j.places : []) || []
+  const exact = places.find((p) => String(p.skyId).toUpperCase() === key)
+  const result = exact ?? places[0] ?? null
+  if (result) airportCache.set(key, result)
+  return result
+}
+
 app.get('/api/flights', async (req, res) => {
   const { origin, dest, date, adults = '1' } = req.query
 
@@ -43,19 +69,35 @@ app.get('/api/flights', async (req, res) => {
     })
   }
 
-  const target = new URL(`https://${RAPIDAPI_HOST}/flights/searchFlights`)
-  target.searchParams.set('originSkyId', String(origin))
-  target.searchParams.set('destinationSkyId', String(dest))
-  target.searchParams.set('date', String(date))
-  target.searchParams.set('adults', String(adults))
-  target.searchParams.set('currency', 'KRW')
-  target.searchParams.set('market', 'ko-KR')
-  target.searchParams.set('countryCode', 'KR')
-
   const ac = new AbortController()
   const timer = setTimeout(() => ac.abort(), 25_000)
 
   try {
+    const [originPlace, destPlace] = await Promise.all([
+      lookupAirport(String(origin), ac.signal),
+      lookupAirport(String(dest), ac.signal),
+    ])
+
+    if (!originPlace?.entityId || !destPlace?.entityId) {
+      return res.status(400).json({
+        error: 'airport_lookup_failed',
+        origin: originPlace ?? null,
+        dest: destPlace ?? null,
+        hint: 'skyId가 정확한지 확인하세요. (예: ICN, GMP, DAD, HKG, TPE)',
+      })
+    }
+
+    const target = new URL(`https://${RAPIDAPI_HOST}/flights/searchFlights`)
+    target.searchParams.set('originSkyId', String(originPlace.skyId))
+    target.searchParams.set('destinationSkyId', String(destPlace.skyId))
+    target.searchParams.set('originEntityId', String(originPlace.entityId))
+    target.searchParams.set('destinationEntityId', String(destPlace.entityId))
+    target.searchParams.set('date', String(date))
+    target.searchParams.set('adults', String(adults))
+    target.searchParams.set('currency', 'KRW')
+    target.searchParams.set('market', 'ko-KR')
+    target.searchParams.set('countryCode', 'KR')
+
     const upstream = await fetch(target, {
       method: 'GET',
       headers: {
