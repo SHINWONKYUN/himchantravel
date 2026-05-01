@@ -337,6 +337,28 @@ body {
   font-size: 0.74rem;
 }
 
+.rank-badge--inline {
+  position: static;
+  height: 22px;
+  min-width: 36px;
+  padding: 0 9px;
+  font-size: 0.7rem;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.travel-card--flat .travel-card__body {
+  padding: 16px 18px 18px;
+}
+
+.travel-card__lead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
 .travel-card__cover {
   display: block;
   height: 100%;
@@ -1129,6 +1151,193 @@ body {
 
 .active-query__clear:hover {
   background: var(--accent-soft);
+}
+
+/* —— Flight results (실시간 항공편) —— */
+
+.flight-results {
+  margin-top: 28px;
+}
+
+.flight-results__title {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.flight-results__loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.flight-results__error {
+  padding: 14px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  color: #991b1b;
+}
+
+.flight-results__error p {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.flight-results__error-detail {
+  margin-top: 6px !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: #b91c1c;
+  word-break: break-all;
+}
+
+.flight-results__empty {
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.flight-results__empty p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.flight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flight-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.flight-card__route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.flight-card__code {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.flight-card__arrow {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.flight-card__times {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.flight-card__times-sep {
+  color: var(--text-muted);
+}
+
+.flight-card__duration {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+.flight-card__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.74rem;
+}
+
+.flight-card__carrier {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.flight-card__stops {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.flight-card__stops--direct {
+  color: var(--accent);
+}
+
+.flight-card__price {
+  grid-column: 1 / -1;
+  text-align: right;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+@media (min-width: 768px) {
+  .flight-card {
+    grid-template-columns: auto auto 1fr auto;
+  }
+  .flight-card__price {
+    grid-column: auto;
+    text-align: right;
+    border-top: none;
+    padding-top: 0;
+    font-size: 1.05rem;
+  }
+}
+
+/* —— BottomNav badge — live variant —— */
+
+.bottom-nav__badge--live {
+  color: #15803d !important;
+  background: #f0fdf4 !important;
+  border-color: #86efac !important;
 }
 
 .trip-detail__section {

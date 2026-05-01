@@ -110,7 +110,9 @@ export function BottomNav({ active, onChange }: Props) {
     <nav className="bottom-nav" aria-label="주 메뉴">
       <div className="bottom-nav__brand">
         <span className="bottom-nav__logo">힘찬트래블</span>
-        <span className="bottom-nav__badge">실시간 검색 연결 예정</span>
+        <span className="bottom-nav__badge bottom-nav__badge--live">
+          항공권 실시간
+        </span>
       </div>
       <div className="bottom-nav__items">
         {ITEMS.map((item) => {

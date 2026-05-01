@@ -32,6 +32,19 @@ const DEPARTURE_OPTIONS: { value: DepartureChoice; label: string }[] = [
   { value: 'seoul', label: '서울 (출발지 무관)' },
 ]
 
+const DESTINATION_OPTIONS: { value: string; label: string }[] = [
+  { value: 'DAD', label: '다낭 (DAD)' },
+  { value: 'CXR', label: '나트랑 (CXR)' },
+  { value: 'PQC', label: '푸꾸옥 (PQC)' },
+  { value: 'HKG', label: '홍콩 (HKG)' },
+  { value: 'TPE', label: '타이베이 (TPE)' },
+  { value: 'BKK', label: '방콕 (BKK)' },
+  { value: 'KIX', label: '오사카 (KIX)' },
+  { value: 'NRT', label: '도쿄 나리타 (NRT)' },
+  { value: 'HKT', label: '푸켓 (HKT)' },
+  { value: 'CEB', label: '세부 (CEB)' },
+]
+
 const PURPOSE_OPTIONS: { value: TravelPurpose; label: string }[] = [
   { value: 'rest', label: '휴양' },
   { value: 'sight', label: '관광' },
@@ -65,6 +78,124 @@ function defaultStartDate(): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
+function pickFirstString(...candidates: unknown[]): string {
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.length > 0) return c
+  }
+  return ''
+}
+
+function pickFirstNumber(...candidates: unknown[]): number {
+  for (const c of candidates) {
+    if (typeof c === 'number' && Number.isFinite(c)) return c
+  }
+  return 0
+}
+
+interface FlightOffer {
+  id: string
+  priceRaw: number
+  priceText: string
+  origin: string
+  destination: string
+  departureTime: string
+  arrivalTime: string
+  durationMinutes: number
+  carrier: string
+  stops: number
+}
+
+function extractItineraries(payload: unknown): unknown[] {
+  if (!payload || typeof payload !== 'object') return []
+  const p = payload as Record<string, unknown>
+  const tryPaths: unknown[] = [
+    (p.data as Record<string, unknown> | undefined)?.itineraries,
+    p.itineraries,
+    (p.data as Record<string, unknown> | undefined)?.flights,
+    p.flights,
+    p.results,
+    p.data,
+  ]
+  for (const v of tryPaths) {
+    if (Array.isArray(v)) return v
+  }
+  return []
+}
+
+function mapToFlightOffer(item: unknown): FlightOffer | null {
+  if (!item || typeof item !== 'object') return null
+  const it = item as Record<string, unknown>
+  const legs = (it.legs as unknown[]) ?? []
+  const firstLeg = (legs[0] as Record<string, unknown>) ?? {}
+  const lastLeg =
+    (legs[legs.length - 1] as Record<string, unknown>) ?? firstLeg
+  const price = (it.price as Record<string, unknown>) ?? {}
+  const origin = (firstLeg.origin as Record<string, unknown>) ?? {}
+  const destination = (lastLeg.destination as Record<string, unknown>) ?? {}
+  const carriers = (firstLeg.carriers as Record<string, unknown>) ?? {}
+  const marketing = (carriers.marketing as unknown[]) ?? []
+  const firstCarrier = (marketing[0] as Record<string, unknown>) ?? {}
+  const segments = (firstLeg.segments as unknown[]) ?? []
+
+  const id = pickFirstString(it.id, firstLeg.id, String(Math.random()))
+  const priceRaw = pickFirstNumber(price.raw, it.priceRaw, it.price)
+  const priceText = pickFirstString(price.formatted, it.priceText)
+  const originCode = pickFirstString(
+    origin.displayCode,
+    origin.id,
+    origin.skyId,
+    origin.code,
+  )
+  const destCode = pickFirstString(
+    destination.displayCode,
+    destination.id,
+    destination.skyId,
+    destination.code,
+  )
+  const departureTime = pickFirstString(firstLeg.departure, firstLeg.departTime)
+  const arrivalTime = pickFirstString(lastLeg.arrival, lastLeg.arrivalTime)
+  const durationMinutes = pickFirstNumber(
+    firstLeg.durationInMinutes,
+    firstLeg.duration,
+  )
+  const carrier = pickFirstString(firstCarrier.name, firstCarrier.alternateId)
+  const stops = Math.max(0, segments.length - 1)
+
+  if (!originCode && !destCode && priceRaw === 0) return null
+
+  return {
+    id,
+    priceRaw,
+    priceText,
+    origin: originCode,
+    destination: destCode,
+    departureTime,
+    arrivalTime,
+    durationMinutes,
+    carrier,
+    stops,
+  }
+}
+
+function formatTime(iso: string): string {
+  if (!iso) return ''
+  const m = iso.match(/T(\d{2}):(\d{2})/)
+  return m ? `${m[1]}:${m[2]}` : iso
+}
+
+function formatDuration(minutes: number): string {
+  if (!minutes) return ''
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return `${h}시간 ${m}분`
+}
+
+function formatPrice(raw: number, fallback: string): string {
+  if (raw > 0) return `${raw.toLocaleString('ko-KR')}원`
+  if (fallback) return fallback
+  return '-'
+}
+
 export function SearchForm() {
   const { applySearchQuery } = useApp()
   const [startDate, setStartDate] = useState<string>(defaultStartDate)
@@ -72,11 +203,17 @@ export function SearchForm() {
   const [travelers, setTravelers] = useState<number>(2)
   const [companion, setCompanion] = useState<CompanionType>('couple')
   const [departure, setDeparture] = useState<DepartureChoice>('ICN')
+  const [destination, setDestination] = useState<string>('DAD')
   const [purpose, setPurpose] = useState<TravelPurpose>('rest')
   const [budget, setBudget] = useState<BudgetTier>('any')
   const [preferences, setPreferences] = useState<Set<PreferenceFlag>>(
     () => new Set(),
   )
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [results, setResults] = useState<FlightOffer[] | null>(null)
+  const [rawNotice, setRawNotice] = useState<string | null>(null)
 
   const togglePreference = (p: PreferenceFlag) => {
     setPreferences((prev) => {
@@ -87,8 +224,9 @@ export function SearchForm() {
     })
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+
     const query: SearchQuery = {
       startDate,
       duration,
@@ -100,6 +238,61 @@ export function SearchForm() {
       preferences: [...preferences],
     }
     applySearchQuery(query)
+
+    setLoading(true)
+    setError(null)
+    setResults(null)
+    setRawNotice(null)
+
+    const originCode = departure === 'seoul' ? 'ICN' : departure
+    const params = new URLSearchParams({
+      origin: originCode,
+      dest: destination,
+      date: startDate,
+      adults: String(travelers),
+    })
+
+    try {
+      const r = await fetch(`/api/flights?${params.toString()}`)
+      const text = await r.text()
+      let data: unknown = null
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error('응답을 JSON으로 파싱할 수 없습니다.')
+      }
+      if (!r.ok) {
+        const errMsg =
+          (data && typeof data === 'object' && 'message' in data
+            ? String((data as Record<string, unknown>).message)
+            : null) || `HTTP ${r.status}`
+        throw new Error(errMsg)
+      }
+
+      const list = extractItineraries(data)
+      const offers = list
+        .map(mapToFlightOffer)
+        .filter((x): x is FlightOffer => x !== null)
+      setResults(offers)
+
+      if (offers.length === 0 && list.length > 0) {
+        setRawNotice(
+          `응답 형태를 매핑하지 못했습니다. 첫 항목 키: ${Object.keys(
+            list[0] as Record<string, unknown>,
+          ).join(', ')}`,
+        )
+      } else if (offers.length === 0) {
+        setRawNotice('응답에 항공편 목록이 없습니다.')
+      }
+    } catch (err) {
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as Record<string, unknown>).message)
+          : '검색 실패. 다시 시도해 주세요.'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -108,7 +301,8 @@ export function SearchForm() {
         <p className="page-header__eyebrow">조건 입력</p>
         <h1 className="page-header__title">여행 조건 검색</h1>
         <p className="page-header__sub">
-          입력 조건에 맞는 상품만 홈 화면에 보여드립니다.
+          입력 조건으로 실시간 항공편을 조회하고, 동시에 등록된 패키지 상품을
+          홈에서 필터합니다.
         </p>
       </header>
 
@@ -125,6 +319,24 @@ export function SearchForm() {
             onChange={(e) => setStartDate(e.target.value)}
             required
           />
+        </div>
+
+        <div className="search-form__field">
+          <label htmlFor="sf-destination" className="search-form__label">
+            도착지
+          </label>
+          <select
+            id="sf-destination"
+            className="search-form__input"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+          >
+            {DESTINATION_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="search-form__field">
@@ -248,10 +460,89 @@ export function SearchForm() {
           </div>
         </fieldset>
 
-        <button type="submit" className="search-form__submit">
-          검색
+        <button
+          type="submit"
+          className="search-form__submit"
+          disabled={loading}
+        >
+          {loading ? '검색 중…' : '실시간 항공권 검색'}
         </button>
       </form>
+
+      <section className="flight-results" aria-live="polite">
+        <h2 className="flight-results__title">
+          실시간 항공편
+          {results ? ` · ${results.length}건` : ''}
+        </h2>
+
+        {loading ? (
+          <div className="flight-results__loading" role="status">
+            <span className="spinner" aria-hidden />
+            <span>항공편을 가져오는 중…</span>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="flight-results__error" role="alert">
+            <p>검색 실패. 다시 시도해 주세요.</p>
+            <p className="flight-results__error-detail">{error}</p>
+          </div>
+        ) : null}
+
+        {!loading && !error && results && results.length > 0 ? (
+          <div className="flight-list">
+            {results.slice(0, 20).map((f) => (
+              <article key={f.id} className="flight-card">
+                <div className="flight-card__route">
+                  <span className="flight-card__code">{f.origin || '?'}</span>
+                  <span className="flight-card__arrow" aria-hidden>
+                    →
+                  </span>
+                  <span className="flight-card__code">
+                    {f.destination || '?'}
+                  </span>
+                </div>
+                <div className="flight-card__times">
+                  <span>{formatTime(f.departureTime)}</span>
+                  <span className="flight-card__times-sep">·</span>
+                  <span>{formatTime(f.arrivalTime)}</span>
+                  {f.durationMinutes ? (
+                    <span className="flight-card__duration">
+                      ({formatDuration(f.durationMinutes)})
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flight-card__meta">
+                  <span className="flight-card__carrier">
+                    {f.carrier || '항공사 미상'}
+                  </span>
+                  {f.stops > 0 ? (
+                    <span className="flight-card__stops">
+                      경유 {f.stops}회
+                    </span>
+                  ) : (
+                    <span className="flight-card__stops flight-card__stops--direct">
+                      직항
+                    </span>
+                  )}
+                </div>
+                <div className="flight-card__price">
+                  {formatPrice(f.priceRaw, f.priceText)}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {!loading && !error && results && results.length === 0 ? (
+          <div className="flight-results__empty">
+            <p>조건에 맞는 항공편이 없습니다.</p>
+            {rawNotice ? (
+              <p className="flight-results__error-detail">{rawNotice}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import type { KeyboardEvent, MouseEvent } from 'react'
 import type { Trip } from '../types/trip'
 import { departureLineLabel } from '../utils/departure'
-import { CoverImage, type PlaceholderVariant } from './CoverImage'
 
 function formatWon(n: number): string {
   return `${n.toLocaleString('ko-KR')}원`
@@ -11,16 +10,6 @@ function priceSignalClass(signal: string): string {
   if (signal === '특가 감지' || signal === '프리미엄') return 'travel-card__signal--deal'
   if (signal === '가격 좋음') return 'travel-card__signal--good'
   return 'travel-card__signal--wait'
-}
-
-function tripPlaceholder(trip: Trip): PlaceholderVariant {
-  if (trip.seatClass === '비즈니스') return 'business'
-  if (trip.destination === '다낭') return 'phu-quoc'
-  if (trip.destination === '나트랑') return 'nha-trang'
-  if (trip.destination === '홍콩') return 'hong-kong'
-  if (trip.destination === '대만') return 'taiwan'
-  if (trip.destination === '푸꾸옥') return 'phu-quoc'
-  return 'default'
 }
 
 function rankBadgeClass(rank: number): string {
@@ -48,7 +37,6 @@ export function TravelCard({
   const tags = trip.tags.slice(0, 3)
   const depart = trip.departureDates.join(', ')
   const departShort = `${departureLineLabel(trip)} · ${depart}`
-  const alt = `${trip.destination} 여행 대표 이미지`
   const isBusiness = trip.seatClass === '비즈니스'
 
   const handleHeartClick = (e: MouseEvent<HTMLButtonElement>) => {
@@ -72,31 +60,26 @@ export function TravelCard({
 
   return (
     <article
-      className={`travel-card${isBusiness ? ' travel-card--biz-hint' : ''}${interactive ? ' travel-card--interactive' : ''}`}
+      className={`travel-card travel-card--flat${isBusiness ? ' travel-card--biz-hint' : ''}${interactive ? ' travel-card--interactive' : ''}`}
       onClick={interactive ? handleCardClick : undefined}
       onKeyDown={interactive ? handleCardKey : undefined}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       aria-label={interactive ? `${trip.productTitle} 상세 보기` : undefined}
     >
-      <div className="travel-card__media">
-        {rank ? (
-          <span className={`rank-badge ${rankBadgeClass(rank)}`}>
-            {rank}위
-          </span>
-        ) : null}
-        <CoverImage
-          alt={alt}
-          placeholderVariant={tripPlaceholder(trip)}
-          className="travel-card__cover"
-          imgClassName="travel-card__img"
-        />
-      </div>
-
       <div className="travel-card__body">
         <header className="travel-card__head">
           <div className="travel-card__title-wrap">
-            <p className="travel-card__agency">{trip.agencyName}</p>
+            <div className="travel-card__lead">
+              {rank ? (
+                <span
+                  className={`rank-badge rank-badge--inline ${rankBadgeClass(rank)}`}
+                >
+                  {rank}위
+                </span>
+              ) : null}
+              <p className="travel-card__agency">{trip.agencyName}</p>
+            </div>
             <h2 className="travel-card__title">{trip.productTitle}</h2>
           </div>
           <button
